@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - SINTAS Admin</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @keyframes zoom-in { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .animate-zoom { animation: zoom-in 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
+    <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl shadow-blue-100 overflow-hidden border border-white relative animate-zoom">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[4rem] opacity-60"></div>
+        
+        <div class="p-10 space-y-8 relative z-10">
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center text-white shadow-xl shadow-blue-200 mb-4">
+                    <i data-lucide="layout-dashboard" size="32"></i>
+                </div>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tighter">SINTAS <span class="text-blue-600">Admin</span></h1>
+                <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">Sistem Manajemen Terpadu</p>
+            </div>
+
+            <form id="loginForm" class="space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email / Username</label>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors">
+                            <i data-lucide="user" size="18"></i>
+                        </div>
+                        <input type="email" id="email" placeholder="Masukkan email admin" required
+                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Password</label>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors">
+                            <i data-lucide="lock" size="18"></i>
+                        </div>
+                        <input type="password" id="password" placeholder="••••••••" required
+                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
+                    </div>
+                </div>
+
+                <div id="errorMessage" class="hidden flex items-center gap-2 text-rose-500 bg-rose-50 p-3 rounded-xl border border-rose-100">
+                    <i data-lucide="alert-circle" size="14"></i>
+                    <p id="errorText" class="text-[10px] font-black uppercase tracking-widest"></p>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4">
+                    <span>Masuk Ke Dashboard</span>
+                    <i data-lucide="log-in" size="18"></i>
+                </button>
+            </form>
+
+            <div class="text-center pt-4 border-t border-dashed border-gray-100">
+                <p class="text-[9px] text-gray-300 font-bold uppercase tracking-widest">Prototype v2.5 • Purwokerto Software House</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        lucide.createIcons();
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btnSubmit = document.getElementById('btnSubmit');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            // Reset state
+            errorMessage.classList.add('hidden');
+            btnSubmit.innerHTML = 'Memproses...';
+            btnSubmit.disabled = true;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Set auth token to localStorage
+                    localStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('user_name', data.user.name);
+                    
+                    // Supaya web session Laravel tau kita sudah login (jika ada mixed web/api)
+                    // Atau kita bisa mengelola pure SPA state, lalu arahkan manual:
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    errorMessage.classList.remove('hidden');
+                    errorText.innerText = data.message || 'Gagal login, periksa kembali data Anda.';
+                    btnSubmit.innerHTML = '<span>Masuk Ke Dashboard</span><i data-lucide="log-in" size="18"></i>';
+                    lucide.createIcons();
+                }
+            } catch (err) {
+                errorMessage.classList.remove('hidden');
+                errorText.innerText = 'Terjadi kesalahan sistem.';
+            } finally {
+                btnSubmit.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
