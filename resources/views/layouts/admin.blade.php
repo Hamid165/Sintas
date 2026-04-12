@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'SINTAS Admin')</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- SheetJS for Excel Export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -22,12 +22,15 @@
 </head>
 <body class="bg-[#F8FAFC] text-slate-800 selection:bg-blue-100">
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden relative">
         
-        <aside id="sidebar" class="w-64 fixed md:relative z-50 bg-[#0F172A] h-full transition-all duration-300 overflow-hidden flex flex-col shadow-2xl">
+        <!-- Mobile Sidebar Overlay (opsional supaya background tertutup) -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+
+        <aside id="sidebar" class="w-64 max-w-[80vw] fixed lg:relative z-50 bg-[#0F172A] h-full transition-transform duration-300 overflow-hidden flex flex-col shadow-2xl shrink-0 -translate-x-full lg:translate-x-0">
             <div class="p-8 flex items-center gap-4">
-                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
-                    <img src="/favicon.png" alt="Logo" class="w-full h-full object-cover">
+                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-1.5">
+                    <img src="/icon.svg" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <span class="text-2xl font-black text-white tracking-tighter">SINTAS</span>
             </div>
@@ -145,7 +148,7 @@
         }
 
         // ─── Global Confirm Dialog ─────────────────────────────────────────────
-        function showConfirm(msg, subtitle = 'Tindakan ini tidak dapat dibatalkan.') {
+        function showConfirm(msg, subtitle = 'Tindakan ini tidak dapat dibatalkan.', title = 'Konfirmasi Tindakan', btnText = 'Lanjutkan') {
             return new Promise(resolve => {
                 const existing = document.getElementById('sintas-confirm');
                 if (existing) existing.remove();
@@ -156,21 +159,21 @@
                 overlay.style.cssText = 'background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); animation: toastIn .2s ease forwards';
                 overlay.innerHTML = `
                     <div style="animation: toastIn .25s cubic-bezier(.34,1.56,.64,1) forwards"
-                         class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-sm w-full text-center">
-                        <div class="w-16 h-16 bg-rose-50 rounded-[1.25rem] flex items-center justify-center mx-auto mb-5">
-                            <i data-lucide="alert-triangle" size="30" class="text-rose-500"></i>
+                         class="bg-white rounded-[2rem] shadow-2xl p-6 md:p-8 max-w-sm w-full text-center">
+                        <div class="w-12 h-12 md:w-16 md:h-16 bg-rose-50 rounded-[1.25rem] flex items-center justify-center mx-auto mb-4 md:mb-5">
+                            <i data-lucide="alert-triangle" size="28" class="text-rose-500"></i>
                         </div>
-                        <h3 class="font-black text-slate-800 text-lg mb-2">Anda Akan Keluar Sistem SITAS?</h3>
-                        <p class="text-gray-500 text-sm font-medium mb-1">${msg}</p>
-                        <p class="text-gray-300 text-xs font-bold uppercase tracking-widest mb-7">${subtitle}</p>
-                        <div class="flex gap-3">
+                        <h3 class="font-black text-slate-800 text-base md:text-lg mb-2">${title}</h3>
+                        <p class="text-gray-500 text-xs md:text-sm font-medium mb-1">${msg}</p>
+                        <p class="text-gray-300 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 md:mb-7">${subtitle}</p>
+                        <div class="flex flex-col sm:flex-row gap-2 md:gap-3">
                             <button id="confirmNo"
-                                class="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-gray-500 font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all">
+                                class="flex-1 py-3 md:py-3.5 rounded-xl md:rounded-2xl border-2 border-gray-200 text-gray-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-gray-50 transition-all">
                                 Batal
                             </button>
                             <button id="confirmYes"
-                                class="flex-1 py-3.5 rounded-2xl bg-rose-600 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-100">
-                                Ya, Hapus
+                                class="flex-1 py-3 md:py-3.5 rounded-xl md:rounded-2xl bg-rose-600 text-white font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-100">
+                                ${btnText}
                             </button>
                         </div>
                     </div>`;
@@ -222,17 +225,30 @@
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            if (sidebar.classList.contains('w-64')) {
-                sidebar.classList.remove('w-64');
-                sidebar.classList.add('w-0');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            // Toggle sidebar
+            sidebar.classList.toggle('-translate-x-full');
+            
+            // Toggle overlay for mobile
+            if (window.innerWidth < 1024) {
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    // Hide overlay
+                    overlay.classList.remove('opacity-100');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                } else {
+                    // Show overlay
+                    overlay.classList.remove('hidden');
+                    // Small delay to allow display:block to apply before animating opacity
+                    setTimeout(() => overlay.classList.add('opacity-100'), 10);
+                }
             } else {
-                sidebar.classList.remove('w-0');
-                sidebar.classList.add('w-64');
+                sidebar.classList.toggle('lg:hidden'); // on desktop if toggled, just hide completely
             }
         }
 
         async function handleLogout() {
-            const ok = await showConfirm('Anda yakin ingin keluar dari sistem?', 'Sesi anda akan berakhir.');
+            const ok = await showConfirm('Anda yakin ingin keluar dari sistem?', 'Sesi anda akan berakhir.', 'Konfirmasi Logout', 'Ya, Log Out');
             if(!ok) return;
             const token = localStorage.getItem('auth_token');
             if(token) {

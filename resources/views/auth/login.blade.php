@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - SINTAS Admin</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -19,8 +19,8 @@
         
         <div class="p-10 space-y-8 relative z-10">
             <div class="text-center space-y-2">
-                <div class="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center text-white shadow-xl shadow-blue-200 mb-4">
-                    <i data-lucide="layout-dashboard" size="32"></i>
+                <div class="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-blue-200 mb-4 p-2.5">
+                    <img src="/icon.svg" alt="SINTAS Logo" class="w-full h-full object-contain">
                 </div>
                 <h1 class="text-3xl font-black text-slate-800 tracking-tighter">SINTAS <span class="text-blue-600">Admin</span></h1>
                 <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">Sistem Manajemen Terpadu</p>

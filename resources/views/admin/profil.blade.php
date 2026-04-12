@@ -21,45 +21,55 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="flex flex-col gap-6 w-full">
 
-        {{-- Left: Avatar Card --}}
-        <div class="bg-white rounded-[2rem] border shadow-sm p-8 flex flex-col items-center text-center gap-5 h-fit self-start">
-            <div class="relative group cursor-pointer" onclick="document.getElementById('inputFoto').click()">
-                <div class="w-32 h-32 rounded-[2rem] overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 border-4 border-white shadow-xl relative">
+        {{-- Top: Avatar Card --}}
+        <div class="bg-white rounded-[2rem] shadow-sm p-8 flex flex-col md:flex-row items-stretch gap-8 w-full">
+            {{-- Foto --}}
+            <div class="relative group cursor-pointer shrink-0 md:w-48" onclick="document.getElementById('inputFoto').click()">
+                <div class="w-32 h-32 md:w-full md:h-full rounded-[2rem] overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 border-4 border-white shadow-xl relative mx-auto md:mx-0">
                     <img id="avatarImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Avatar" class="w-full h-full object-cover">
                     {{-- Hover Overlay --}}
                     <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <i data-lucide="camera" class="text-white" size="24"></i>
                     </div>
                 </div>
-                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-white" title="Ganti Foto">
+                <div class="absolute bottom-0 right-1/2 translate-x-1/2 translate-y-1/2 md:translate-x-0 md:translate-y-0 md:-bottom-3 md:-right-3 w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg border-4 border-white" title="Ganti Foto">
                     <i data-lucide="pencil" size="14" class="text-white"></i>
                 </div>
                 <input type="file" id="inputFoto" class="hidden" accept="image/*">
             </div>
-            <div>
-                <h3 id="namaDisplay" class="text-xl font-black text-slate-800">Administrator</h3>
-                <p id="emailDisplay" class="text-xs text-gray-400 font-bold mt-1">admin@sintas.id</p>
-                <span class="mt-3 inline-block bg-blue-50 text-blue-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest">Super Admin</span>
-            </div>
-            <div class="w-full border-t pt-5 space-y-3">
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-gray-400 font-bold uppercase tracking-widest">Status Akun</span>
-                    <span class="text-emerald-600 font-black">● Aktif</span>
+
+            {{-- Informasi Kanan --}}
+            <div class="flex flex-col justify-between w-full space-y-4 md:space-y-0 py-2">
+                <div class="flex justify-between items-center border-b border-gray-50 pb-3">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nama Lengkap</span>
+                    <h3 id="namaDisplay" class="text-sm font-black text-slate-800">Administrator</h3>
                 </div>
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-gray-400 font-bold uppercase tracking-widest">Login Terakhir</span>
-                    <span id="loginTerakhir" class="font-black text-gray-700">—</span>
+                <div class="flex justify-between items-center border-b border-gray-50 pb-3">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email</span>
+                    <p id="emailDisplay" class="text-sm font-bold text-gray-800">admin@sintas.id</p>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-50 pb-3">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</span>
+                    <span class="bg-blue-50 text-blue-700 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">Super Admin</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-gray-50 pb-3">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status Akun</span>
+                    <span class="text-emerald-600 font-black text-sm">● Aktif</span>
+                </div>
+                <div class="flex justify-between items-center pt-1 md:pt-0">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Login Terakhir</span>
+                    <span id="loginTerakhir" class="text-sm font-black text-gray-800">—</span>
                 </div>
             </div>
         </div>
 
-        {{-- Right: Forms --}}
-        <div class="lg:col-span-2 space-y-6">
+        {{-- Bottom: Forms --}}
+        <div class="space-y-6 w-full">
 
             {{-- Edit Profil --}}
-            <div class="bg-white rounded-[2rem] border shadow-sm p-10">
+            <div class="bg-white rounded-[2rem] shadow-sm p-10">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                         <i data-lucide="user" size="18"></i>
@@ -71,7 +81,7 @@
                 </div>
 
                 <form id="formProfil" class="space-y-5">
-                    <div class="grid grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 gap-5">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Nama Lengkap</label>
                             <input type="text" id="inputNama" placeholder="Nama Admin"
@@ -84,14 +94,14 @@
                         </div>
                     </div>
                     <div id="alertProfil" class="hidden p-4 rounded-2xl text-sm font-bold"></div>
-                    <button type="submit" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-3 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-xs tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
                         <i data-lucide="save" size="16"></i> Simpan Perubahan
                     </button>
                 </form>
             </div>
 
             {{-- Ganti Password --}}
-            <div class="bg-white rounded-[2rem] border shadow-sm p-10">
+            <div class="bg-white rounded-[2rem] shadow-sm p-10">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center">
                         <i data-lucide="lock" size="18"></i>
@@ -113,7 +123,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 gap-5">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Password Baru</label>
                             <div class="relative">
@@ -136,7 +146,7 @@
                         </div>
                     </div>
                     <div id="alertPassword" class="hidden p-4 rounded-2xl text-sm font-bold"></div>
-                    <button type="submit" class="bg-rose-500 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-rose-100 hover:bg-rose-600 transition-all flex items-center gap-2">
+                    <button type="submit" class="w-full sm:w-auto bg-rose-500 text-white px-5 py-3 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-xs tracking-widest shadow-xl shadow-rose-100 hover:bg-rose-600 transition-all flex items-center justify-center gap-2">
                         <i data-lucide="key" size="16"></i> Update Password
                     </button>
                 </form>

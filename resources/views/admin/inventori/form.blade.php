@@ -41,7 +41,7 @@
             </div>
 
             {{-- Row 2: Stok + Kondisi + Kategori --}}
-            <div class="grid grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6">
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Jumlah Stok <span class="text-rose-500">*</span></label>
                     <input type="number" id="stok" placeholder="0" min="0"
@@ -90,17 +90,17 @@
             </div>
 
             {{-- Actions --}}
-            <div class="border-t border-gray-100 pt-6 flex items-center gap-4">
-                <button type="submit" id="btnSimpan"
-                    class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center gap-2">
-                    <i data-lucide="save" size="16"></i>
-                    <span id="btnText">Simpan Barang</span>
-                </button>
+            <div class="border-t border-gray-100 pt-6 flex flex-row flex-wrap items-center gap-2 md:gap-4 w-full">
                 <a href="{{ route('admin.inventori') }}"
-                    class="px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest border-2 border-gray-200 text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-all flex items-center gap-2">
+                    class="px-4 py-3 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-xs tracking-widest border-2 border-gray-200 text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="x" size="16"></i> Batal
                 </a>
-                <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest ml-2">Bidang bertanda <span class="text-rose-400">*</span> wajib diisi</p>
+                <button type="submit" id="btnSimpan"
+                    class="bg-blue-600 text-white px-5 py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-xs tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i data-lucide="save" size="16"></i>
+                    <span id="btnText">Simpan</span>
+                </button>
+                <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest hidden lg:block ml-auto text-center sm:text-left">Bidang bertanda <span class="text-rose-400">*</span> wajib diisi</p>
             </div>
         </form>
     </div>
