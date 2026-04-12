@@ -5,14 +5,23 @@
 <div class="space-y-6 w-full">
 
     {{-- Header --}}
-    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm">
+    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm flex-wrap gap-4">
         <div>
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Logistik & Inventaris</h3>
             <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Total: <span id="statBarang">0</span> Item Tersimpan</p>
         </div>
-        <a href="{{ route('admin.inventori.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2">
-            <i data-lucide="plus" size="16"></i> Tambah Barang
-        </a>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
+                <input type="text" id="searchInput" placeholder="Cari barang..." class="pl-10 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-60 md:w-72">
+            </div>
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="file-spreadsheet" size="16"></i> Export
+            </button>
+            <a href="{{ route('admin.inventori.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="plus" size="16"></i> Tambah Barang
+            </a>
+        </div>
     </div>
 
     {{-- Table --}}
@@ -75,16 +84,31 @@
 
     const PER_PAGE = 10;
     let allData = [];
+    let filteredData = [];
     let currentPage = 1;
 
-    document.addEventListener('DOMContentLoaded', loadInventori);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadInventori();
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            filteredData = allData.filter(i => 
+                (i.nama_barang || '').toLowerCase().includes(keyword) ||
+                (i.kategori || '').toLowerCase().includes(keyword) ||
+                (i.kondisi || '').toLowerCase().includes(keyword)
+            );
+            document.getElementById('statBarang').innerText = filteredData.length;
+            renderPage(1);
+        });
+    });
 
     async function loadInventori() {
         try {
             const res = await fetch('/api/inventaris', { headers: getAuthHeaders() });
             if(res.status === 401) { localStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
             allData = await res.json();
-            document.getElementById('statBarang').innerText = allData.length;
+            filteredData = [...allData];
+            document.getElementById('statBarang').innerText = filteredData.length;
             renderPage(1);
         } catch(e) { console.error(e); }
     }
@@ -92,10 +116,10 @@
     function renderPage(page) {
         currentPage = page;
         const start = (page - 1) * PER_PAGE;
-        const pageData = allData.slice(start, start + PER_PAGE);
+        const pageData = filteredData.slice(start, start + PER_PAGE);
         const tbody = document.getElementById('inventarisTBody');
 
-        if (allData.length === 0) {
+        if (filteredData.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="px-8 py-24 text-center text-gray-400">
                 <i data-lucide="package" class="mx-auto text-gray-200 mb-4" size="48"></i>
                 <p class="font-bold text-gray-400 uppercase text-xs tracking-widest mb-4">Belum ada barang inventaris.</p>
@@ -144,7 +168,7 @@
             </tr>`;
         }).join('');
 
-        renderPagination(allData.length, page);
+        renderPagination(filteredData.length, page);
         lucide.createIcons();
     }
 
@@ -192,6 +216,26 @@
             showToast('Barang berhasil dihapus dari inventaris.', 'success');
             loadInventori();
         } catch(e) { showToast('Gagal menghapus barang.', 'error'); }
+    }
+
+    function exportExcel() {
+        if(filteredData.length === 0) return showToast('Tidak ada data yang bisa diekspor.', 'warning');
+        
+        const dataToExport = filteredData.map((i, index) => {
+            return {
+                '#': index + 1,
+                'Nama Barang': i.nama_barang || '-',
+                'Kategori': i.kategori || '-',
+                'Stok': i.stok || 0,
+                'Kondisi': i.kondisi || '-'
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data Inventaris");
+        
+        XLSX.writeFile(workbook, "data-inventaris-sintas.xlsx");
     }
 </script>
 @endsection

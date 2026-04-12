@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -158,7 +160,7 @@
                         <div class="w-16 h-16 bg-rose-50 rounded-[1.25rem] flex items-center justify-center mx-auto mb-5">
                             <i data-lucide="alert-triangle" size="30" class="text-rose-500"></i>
                         </div>
-                        <h3 class="font-black text-slate-800 text-lg mb-2">Konfirmasi Hapus</h3>
+                        <h3 class="font-black text-slate-800 text-lg mb-2">Anda Akan Keluar Sistem SITAS?</h3>
                         <p class="text-gray-500 text-sm font-medium mb-1">${msg}</p>
                         <p class="text-gray-300 text-xs font-bold uppercase tracking-widest mb-7">${subtitle}</p>
                         <div class="flex gap-3">
@@ -230,7 +232,8 @@
         }
 
         async function handleLogout() {
-            if(!confirm('Anda yakin ingin keluar?')) return;
+            const ok = await showConfirm('Anda yakin ingin keluar dari sistem?', 'Sesi anda akan berakhir.');
+            if(!ok) return;
             const token = localStorage.getItem('auth_token');
             if(token) {
                 try {

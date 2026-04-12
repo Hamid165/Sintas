@@ -4,14 +4,23 @@
 @section('content')
 <div class="space-y-6 w-full">
 
-    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm">
+    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm flex-wrap gap-4">
         <div>
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Manajemen Keuangan</h3>
             <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Laporan Pemasukan & Pengeluaran SINTAS</p>
         </div>
-        <a href="{{ route('admin.keuangan.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2">
-            <i data-lucide="plus" size="16"></i> Tambah Transaksi
-        </a>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
+                <input type="text" id="searchInput" placeholder="Cari transaksi..." class="pl-10 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-60 md:w-72">
+            </div>
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="file-spreadsheet" size="16"></i> Export
+            </button>
+            <a href="{{ route('admin.keuangan.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="plus" size="16"></i> Tambah Transaksi
+            </a>
+        </div>
     </div>
 
     {{-- Stats --}}
@@ -95,36 +104,54 @@
 
     const PER_PAGE = 10;
     let allData = [];
+    let filteredData = [];
 
-    document.addEventListener('DOMContentLoaded', loadKeuangan);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadKeuangan();
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            filteredData = allData.filter(t => 
+                (t.kategori || '').toLowerCase().includes(keyword) ||
+                (t.keterangan || '').toLowerCase().includes(keyword) ||
+                (t.jenis_transaksi || '').toLowerCase().includes(keyword)
+            );
+            updateStats();
+            renderPage(1);
+        });
+    });
 
     async function loadKeuangan() {
         try {
             const res = await fetch('/api/keuangan', { headers: getAuthHeaders() });
             if(res.status === 401) { localStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
             allData = await res.json();
+            filteredData = [...allData];
 
-            let totalMasuk = 0, totalKeluar = 0;
-            allData.forEach(t => {
-                const n = parseFloat(t.jumlah_nominal);
-                if(t.jenis_transaksi === 'Pemasukan') totalMasuk += n;
-                else totalKeluar += n;
-            });
-            document.getElementById('statMasuk').innerText = formatRp(totalMasuk);
-            document.getElementById('statKeluar').innerText = formatRp(totalKeluar);
-            document.getElementById('statSaldo').innerText = formatRp(totalMasuk - totalKeluar);
-            document.getElementById('totalTrx').innerText = allData.length + ' transaksi';
-
+            updateStats();
             renderPage(1);
         } catch(e) { console.error(e); }
     }
 
+    function updateStats() {
+        let totalMasuk = 0, totalKeluar = 0;
+        filteredData.forEach(t => {
+            const n = parseFloat(t.jumlah_nominal);
+            if(t.jenis_transaksi === 'Pemasukan') totalMasuk += n;
+            else totalKeluar += n;
+        });
+        document.getElementById('statMasuk').innerText = formatRp(totalMasuk);
+        document.getElementById('statKeluar').innerText = formatRp(totalKeluar);
+        document.getElementById('statSaldo').innerText = formatRp(totalMasuk - totalKeluar);
+        document.getElementById('totalTrx').innerText = filteredData.length + ' transaksi';
+    }
+
     function renderPage(page) {
         const start = (page - 1) * PER_PAGE;
-        const pageData = allData.slice(start, start + PER_PAGE);
+        const pageData = filteredData.slice(start, start + PER_PAGE);
         const tbody = document.getElementById('keuanganTable');
 
-        if (allData.length === 0) {
+        if (filteredData.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="px-8 py-24 text-center text-gray-400">
                 <i data-lucide="inbox" class="mx-auto text-gray-200 mb-4" size="48"></i>
                 <p class="font-bold uppercase text-xs tracking-widest mb-4">Belum ada riwayat transaksi.</p>
@@ -157,7 +184,7 @@
             </tr>`;
         }).join('');
 
-        renderPagination(allData.length, page);
+        renderPagination(filteredData.length, page);
         lucide.createIcons();
     }
 
@@ -205,6 +232,28 @@
             showToast('Transaksi berhasil dihapus.', 'success');
             loadKeuangan();
         } catch(e) { showToast('Gagal menghapus transaksi.', 'error'); }
+    }
+
+    function exportExcel() {
+        if(filteredData.length === 0) return showToast('Tidak ada data yang bisa diekspor.', 'warning');
+        
+        const dataToExport = filteredData.map((t, index) => {
+            const tgl = new Date(t.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
+            return {
+                '#': index + 1,
+                'Tanggal': tgl,
+                'Kategori': t.kategori || '-',
+                'Keterangan': t.keterangan || '-',
+                'Jenis': t.jenis_transaksi || '-',
+                'Nominal': parseFloat(t.jumlah_nominal) || 0
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data Keuangan");
+        
+        XLSX.writeFile(workbook, "data-keuangan-sintas.xlsx");
     }
 </script>
 @endsection

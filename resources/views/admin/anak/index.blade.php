@@ -5,14 +5,23 @@
 <div class="space-y-6 w-full">
 
     {{-- Header --}}
-    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm">
+    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm flex-wrap gap-4">
         <div>
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Database Anak Asuh</h3>
             <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest font-bold">Total: <span id="statTotalAnak">0</span> Anak Terdaftar</p>
         </div>
-        <a href="{{ route('admin.anak.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2">
-            <i data-lucide="plus" size="16"></i> Tambah Anak
-        </a>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
+                <input type="text" id="searchInput" placeholder="Cari nama anak..." class="pl-10 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-60 md:w-72">
+            </div>
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="file-spreadsheet" size="16"></i> Export
+            </button>
+            <a href="{{ route('admin.anak.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="plus" size="16"></i> Tambah Anak
+            </a>
+        </div>
     </div>
 
     {{-- Table --}}
@@ -60,16 +69,32 @@
 
     const PER_PAGE = 10;
     let allData = [];
+    let filteredData = [];
     let currentPage = 1;
 
-    document.addEventListener('DOMContentLoaded', loadData);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            filteredData = allData.filter(c => 
+                (c.nama_lengkap || '').toLowerCase().includes(keyword) ||
+                (c.tempat_tgl_lahir || '').toLowerCase().includes(keyword) ||
+                (c.riwayat_kesehatan || '').toLowerCase().includes(keyword) ||
+                (c.info_pendidikan || '').toLowerCase().includes(keyword)
+            );
+            document.getElementById('statTotalAnak').innerText = filteredData.length;
+            renderPage(1);
+        });
+    });
 
     async function loadData() {
         try {
             const res = await fetch('/api/anak', { headers: getAuthHeaders() });
             if(res.status === 401) { localStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
             allData = await res.json();
-            document.getElementById('statTotalAnak').innerText = allData.length;
+            filteredData = [...allData];
+            document.getElementById('statTotalAnak').innerText = filteredData.length;
             renderPage(1);
         } catch (e) { console.error(e); }
     }
@@ -78,10 +103,10 @@
         currentPage = page;
         const start = (page - 1) * PER_PAGE;
         const end = start + PER_PAGE;
-        const pageData = allData.slice(start, end);
+        const pageData = filteredData.slice(start, end);
         const tbody = document.getElementById('anakTableBody');
 
-        if (allData.length === 0) {
+        if (filteredData.length === 0) {
             tbody.innerHTML = `<tr><td colspan="8" class="px-8 py-24 text-center text-gray-400">
                 <i data-lucide="users" class="mx-auto text-gray-200 mb-4" size="48"></i>
                 <p class="font-bold uppercase text-xs tracking-widest mb-4">Belum ada data anak asuh.</p>
@@ -122,7 +147,7 @@
             </tr>
         `).join('');
 
-        renderPagination(allData.length, page);
+        renderPagination(filteredData.length, page);
         lucide.createIcons();
     }
 
@@ -172,6 +197,28 @@
             showToast('Data anak berhasil dihapus.', 'success');
             loadData();
         } catch(e) { showToast('Gagal menghapus data.', 'error'); }
+    }
+
+    function exportExcel() {
+        if(filteredData.length === 0) return showToast('Tidak ada data yang bisa diekspor.', 'warning');
+        
+        const dataToExport = filteredData.map((c, index) => {
+            return {
+                '#': index + 1,
+                'Nama Lengkap': c.nama_lengkap || '-',
+                'Usia': (c.usia || '0') + ' Tahun',
+                'Jenis Kelamin': c.jenis_kelamin || '-',
+                'Tempat / Tgl Lahir': c.tempat_tgl_lahir || '-',
+                'Riwayat Kesehatan': c.riwayat_kesehatan || 'Sehat',
+                'Pendidikan': c.info_pendidikan || '-'
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data Anak");
+        
+        XLSX.writeFile(workbook, "data-anak-sintas.xlsx");
     }
 </script>
 @endsection

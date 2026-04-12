@@ -4,14 +4,23 @@
 @section('content')
 <div class="space-y-6 w-full">
 
-    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm">
+    <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] border shadow-sm flex-wrap gap-4">
         <div>
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Artikel & CMS</h3>
             <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Total: <span id="statArtikel">0</span> Artikel Dipublish</p>
         </div>
-        <a href="{{ route('admin.artikel.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2">
-            <i data-lucide="plus" size="16"></i> Tulis Artikel
-        </a>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
+                <input type="text" id="searchInput" placeholder="Cari artikel..." class="pl-10 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-60 md:w-72">
+            </div>
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="file-spreadsheet" size="16"></i> Export
+            </button>
+            <a href="{{ route('admin.artikel.tambah') }}" class="bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 min-w-max">
+                <i data-lucide="plus" size="16"></i> Tulis Artikel
+            </a>
+        </div>
     </div>
 
     {{-- Grid Artikel --}}
@@ -41,25 +50,39 @@
 
     const PER_PAGE = 8; // 8 cards per halaman untuk grid 4 kolom
     let allData = [];
+    let filteredData = [];
 
-    document.addEventListener('DOMContentLoaded', loadArtikel);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadArtikel();
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            filteredData = allData.filter(a => 
+                (a.judul || '').toLowerCase().includes(keyword) ||
+                (a.deskripsi_konten || '').toLowerCase().includes(keyword)
+            );
+            document.getElementById('statArtikel').innerText = filteredData.length;
+            renderPage(1);
+        });
+    });
 
     async function loadArtikel() {
         try {
             const res = await fetch('/api/artikel', { headers: getAuthHeaders() });
             if(res.status === 401) { localStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
             allData = await res.json();
-            document.getElementById('statArtikel').innerText = allData.length;
+            filteredData = [...allData];
+            document.getElementById('statArtikel').innerText = filteredData.length;
             renderPage(1);
         } catch(e) { console.error(e); }
     }
 
     function renderPage(page) {
         const start = (page - 1) * PER_PAGE;
-        const pageData = allData.slice(start, start + PER_PAGE);
+        const pageData = filteredData.slice(start, start + PER_PAGE);
         const grid = document.getElementById('artikelGrid');
 
-        if (allData.length === 0) {
+        if (filteredData.length === 0) {
             grid.innerHTML = `<div class="col-span-full bg-white p-24 rounded-[2.5rem] border border-dashed text-center">
                 <i data-lucide="newspaper" class="mx-auto text-gray-200 mb-4" size="56"></i>
                 <p class="text-gray-400 font-bold uppercase text-xs tracking-widest mb-5">Belum ada artikel.</p>
@@ -98,7 +121,7 @@
             </div>`;
         }).join('');
 
-        renderPagination(allData.length, page);
+        renderPagination(filteredData.length, page);
         lucide.createIcons();
     }
 
@@ -146,6 +169,27 @@
             showToast('Artikel berhasil dihapus.', 'success');
             loadArtikel();
         } catch(e) { showToast('Gagal menghapus artikel.', 'error'); }
+    }
+
+    function exportExcel() {
+        if(filteredData.length === 0) return showToast('Tidak ada data yang bisa diekspor.', 'warning');
+        
+        const dataToExport = filteredData.map((a, index) => {
+            const tgl = new Date(a.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
+            const textContent = (a.deskripsi_konten || '').replace(/<[^>]*>?/gm, '');
+            return {
+                '#': index + 1,
+                'Judul Artikel': a.judul || '-',
+                'Tanggal Dipublish': tgl,
+                'Deskripsi Konten': textContent
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data Artikel");
+        
+        XLSX.writeFile(workbook, "data-artikel-sintas.xlsx");
     }
 </script>
 @endsection
