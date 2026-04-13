@@ -72,7 +72,7 @@
                         <th class="px-6 py-5">Keterangan</th>
                         <th class="px-6 py-5">Jenis</th>
                         <th class="px-6 py-5 text-right">Nominal</th>
-                        <th class="px-6 py-5 text-center">Hapus</th>
+                        <th class="px-6 py-5 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="keuanganTable" class="divide-y divide-gray-100 text-sm">
@@ -113,7 +113,7 @@
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const keyword = e.target.value.toLowerCase();
-            filteredData = allData.filter(t => 
+            filteredData = allData.filter(t =>
                 (t.kategori || '').toLowerCase().includes(keyword) ||
                 (t.keterangan || '').toLowerCase().includes(keyword) ||
                 (t.jenis_transaksi || '').toLowerCase().includes(keyword)
@@ -237,7 +237,7 @@
 
     function exportExcel() {
         if(filteredData.length === 0) return showToast('Tidak ada data yang bisa diekspor.', 'warning');
-        
+
         const dataToExport = filteredData.map((t, index) => {
             const tgl = new Date(t.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
             return {
@@ -253,7 +253,7 @@
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Data Keuangan");
-        
+
         XLSX.writeFile(workbook, "data-keuangan-sintas.xlsx");
     }
 </script>
