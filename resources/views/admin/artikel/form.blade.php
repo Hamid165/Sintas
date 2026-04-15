@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Artikel & CMS - SINTAS')
+@section('title', 'Artikel & CMS - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -19,32 +19,32 @@
             </div>
             <div>
                 <h2 id="formTitle" class="text-2xl font-black uppercase tracking-tighter">Tulis Artikel Baru</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">SINTAS CMS Engine</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub CMS Engine</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
-            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">SINTAS</p>
+            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">CareHub</p>
             <p id="tanggalHari" class="text-white font-black text-sm mt-1"></p>
         </div>
     </div>
 
     {{-- Form Full Width --}}
     {{-- Kolom DB: judul | deskripsi_konten | gambar_konten (nullable) --}}
-    <div class="bg-white rounded-[2rem] border shadow-sm p-10">
+    <div class="bg-white rounded-[2rem] border-0 shadow-sm p-10">
         <form id="formArtikel" class="space-y-6">
 
             {{-- Judul --}}
             <div class="space-y-2">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Judul Artikel <span class="text-rose-500">*</span></label>
                 <input type="text" id="judul" placeholder="Masukkan judul artikel yang menarik perhatian..."
-                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
+                    class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
             </div>
 
             {{-- Deskripsi Konten --}}
             <div class="space-y-2">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Isi Konten / Deskripsi <span class="text-rose-500">*</span></label>
                 <textarea id="deskripsi_konten" rows="12" placeholder="Tuliskan isi berita, kegiatan, atau pengumuman panti asuhan di sini..."
-                    class="w-full p-5 bg-gray-50 border border-gray-200 rounded-2xl text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm leading-relaxed resize-none" required></textarea>
+                    class="w-full p-5 bg-gray-50 border-0 border-gray-200 rounded-2xl text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm leading-relaxed resize-none" required></textarea>
                 <div class="flex justify-end">
                     <p id="charCount" class="text-[10px] text-gray-300 font-bold">0 karakter</p>
                 </div>
@@ -67,7 +67,7 @@
                     </div>
                     <input type="file" id="gambar_konten_file" accept="image/*" class="hidden" onchange="previewGambar(this)">
                 </div>
-                <div id="fileInfo" class="hidden flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
+                <div id="fileInfo" class="hidden flex items-center gap-3 bg-blue-50 border-0 border-blue-100 rounded-2xl px-4 py-3">
                     <i data-lucide="image" size="16" class="text-blue-500"></i>
                     <span id="namaFile" class="text-xs font-black text-blue-700"></span>
                     <button type="button" onclick="hapusGambar()" class="ml-auto text-rose-400 hover:text-rose-600 transition-colors">

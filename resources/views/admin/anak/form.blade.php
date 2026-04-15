@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Manajemen Anak - SINTAS')
+@section('title', 'Manajemen Anak - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -19,24 +19,24 @@
             </div>
             <div>
                 <h2 id="formTitle" class="text-2xl font-black uppercase tracking-tighter">Tambah Anak Baru</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">SINTAS Database System</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub Database System</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
-            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">SINTAS</p>
+            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">CareHub</p>
             <p id="tanggalHari" class="text-white font-black text-sm mt-1"></p>
         </div>
     </div>
 
     {{-- Form Full Width --}}
-    <div class="bg-white rounded-[2rem] border shadow-sm p-10">
+    <div class="bg-white rounded-[2rem] border-0 shadow-sm p-10">
         <form id="formAnak" class="space-y-6">
 
             {{-- Row 1: Nama --}}
             <div class="space-y-2">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Nama Lengkap <span class="text-rose-500">*</span></label>
                 <input type="text" id="nama" placeholder="Masukkan nama lengkap anak..."
-                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
+                    class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
             </div>
 
             {{-- Row 2: Usia + Gender + TTL --}}
@@ -44,11 +44,11 @@
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Usia <span class="text-rose-500">*</span></label>
                     <input type="number" id="usia" placeholder="0" min="0" max="99"
-                        class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all" required>
+                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all" required>
                 </div>
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Jenis Kelamin <span class="text-rose-500">*</span></label>
-                    <select id="jenis_kelamin" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none appearance-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all">
+                    <select id="jenis_kelamin" class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none appearance-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all">
                         <option value="Laki-laki">Laki-laki</option>
                         <option value="Perempuan">Perempuan</option>
                     </select>
@@ -56,7 +56,7 @@
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Tempat / Tanggal Lahir <span class="text-rose-500">*</span></label>
                     <input type="text" id="tempat_tgl_lahir" placeholder="Purwokerto, 12 Mei 2012"
-                        class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
+                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
                 </div>
             </div>
 
@@ -65,12 +65,12 @@
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Pendidikan / Sekolah</label>
                     <input type="text" id="info_pendidikan" placeholder="SD Negeri 1 Purwokerto..."
-                        class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
                 </div>
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Riwayat Kesehatan</label>
                     <input type="text" id="riwayat_kesehatan" placeholder="Sehat / Alergi debu / dll..."
-                        class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
                 </div>
             </div>
 

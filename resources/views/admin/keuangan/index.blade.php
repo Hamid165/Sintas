@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Keuangan - SINTAS')
+@section('title', 'Keuangan - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -7,12 +7,12 @@
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm gap-4">
         <div class="w-full lg:w-auto">
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Manajemen Keuangan</h3>
-            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Laporan Pemasukan & Pengeluaran SINTAS</p>
+            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Laporan Pemasukan & Pengeluaran CareHub</p>
         </div>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
             <div class="relative w-full sm:w-auto">
                 <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
-                <input type="text" id="searchInput" placeholder="Cari transaksi..." class="pl-10 pr-4 py-3 md:py-3.5 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-full sm:w-60 md:w-72">
+                <input type="text" id="searchInput" placeholder="Cari transaksi..." class="pl-10 pr-4 py-3 md:py-3.5 bg-gray-50 border-0 border-gray-200 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-full sm:w-60 md:w-72">
             </div>
             <div class="flex gap-2 w-full sm:w-auto">
                 <button onclick="exportExcel()" class="flex-1 sm:flex-none justify-center bg-emerald-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 whitespace-nowrap">
@@ -203,7 +203,7 @@
         info.innerText = `Menampilkan ${start}–${end} dari ${total} data`;
 
         let html = `<button onclick="renderPage(${page - 1})" ${page === 1 ? 'disabled' : ''}
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border-0 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
             <i data-lucide="chevron-left" size="16"></i>
         </button>`;
         for (let p = 1; p <= totalPages; p++) {
@@ -212,12 +212,12 @@
                 continue;
             }
             html += `<button onclick="renderPage(${p})"
-                class="w-9 h-9 rounded-xl text-xs font-black transition-all ${p === page ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'text-gray-400 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'}">
+                class="w-9 h-9 rounded-xl text-xs font-black transition-all ${p === page ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'text-gray-400 border-0 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'}">
                 ${p}
             </button>`;
         }
         html += `<button onclick="renderPage(${page + 1})" ${page === totalPages ? 'disabled' : ''}
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border-0 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
             <i data-lucide="chevron-right" size="16"></i>
         </button>`;
 
@@ -254,7 +254,7 @@
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Data Keuangan");
 
-        XLSX.writeFile(workbook, "data-keuangan-sintas.xlsx");
+        XLSX.writeFile(workbook, "data-keuangan-carehub.xlsx");
     }
 </script>
 @endsection

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'SINTAS Admin')</title>
+    <title>@yield('title', 'CareHub Admin')</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
                 <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-1.5">
                     <img src="/icon.svg" alt="Logo" class="w-full h-full object-contain">
                 </div>
-                <span class="text-2xl font-black text-white tracking-tighter">SINTAS</span>
+                <span class="text-2xl font-black tracking-tighter"><span class="text-white">Care</span><span class="text-blue-500">Hub</span></span>
             </div>
 
             <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto scrollbar-hide">
@@ -95,7 +95,7 @@
                         @elseif(request()->routeIs('admin.profil'))
                             Profil Admin
                         @else
-                            SINTAS
+                            CareHub
                         @endif
                     </h2>
                 </div>

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Login - SINTAS Admin</title>
+    <title>Login - CareHub Admin</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -14,15 +14,15 @@
     </style>
 </head>
 <body class="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
-    <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl shadow-blue-100 overflow-hidden border border-white relative animate-zoom">
+    <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl shadow-blue-100 overflow-hidden border-0 border-white relative animate-zoom">
         <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[4rem] opacity-60"></div>
         
         <div class="p-10 space-y-8 relative z-10">
             <div class="text-center space-y-2">
                 <div class="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-blue-200 mb-4 p-2.5">
-                    <img src="/icon.svg" alt="SINTAS Logo" class="w-full h-full object-contain">
+                    <img src="/icon.svg" alt="CareHub Logo" class="w-full h-full object-contain">
                 </div>
-                <h1 class="text-3xl font-black text-slate-800 tracking-tighter">SINTAS <span class="text-blue-600">Admin</span></h1>
+                <h1 class="text-3xl font-black tracking-tighter"><span class="bg-blue-900 px-2 py-0.5 rounded-l-xl text-white">Care</span><span class="text-blue-600 bg-blue-100 px-2 py-0.5 rounded-r-xl">Hub</span> Admin</h1>
                 <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">Sistem Manajemen Terpadu</p>
             </div>
 
@@ -34,7 +34,7 @@
                             <i data-lucide="user" size="18"></i>
                         </div>
                         <input type="email" id="email" placeholder="Masukkan email admin" required
-                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
+                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
                     </div>
                 </div>
 
@@ -45,11 +45,11 @@
                             <i data-lucide="lock" size="18"></i>
                         </div>
                         <input type="password" id="password" placeholder="••••••••" required
-                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
+                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
                     </div>
                 </div>
 
-                <div id="errorMessage" class="hidden flex items-center gap-2 text-rose-500 bg-rose-50 p-3 rounded-xl border border-rose-100">
+                <div id="errorMessage" class="hidden flex items-center gap-2 text-rose-500 bg-rose-50 p-3 rounded-xl border-0 border-rose-100">
                     <i data-lucide="alert-circle" size="14"></i>
                     <p id="errorText" class="text-[10px] font-black uppercase tracking-widest"></p>
                 </div>

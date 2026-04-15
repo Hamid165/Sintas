@@ -19,13 +19,13 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Admin Utama',
-            'email' => 'admin@sintas.com',
+            'email' => 'admin@CareHub.com',
             'password' => bcrypt('password123'),
         ]);
         
         // Dummy data untuk profil
         \App\Models\Profil::create([
-            'nama' => 'Panti Asuhan Sintas',
+            'nama' => 'Panti Asuhan CareHub',
             'foto_profil' => null,
             'password' => null
         ]);

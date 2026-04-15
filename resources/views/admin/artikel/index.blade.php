@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Artikel & CMS - SINTAS')
+@section('title', 'Artikel & CMS - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -12,7 +12,7 @@
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
             <div class="relative w-full sm:w-auto">
                 <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
-                <input type="text" id="searchInput" placeholder="Cari artikel..." class="pl-10 pr-4 py-3 md:py-3.5 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-full sm:w-60 md:w-72">
+                <input type="text" id="searchInput" placeholder="Cari artikel..." class="pl-10 pr-4 py-3 md:py-3.5 bg-gray-50 border-0 border-gray-200 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all w-full sm:w-60 md:w-72">
             </div>
             <div class="flex gap-2 w-full sm:w-auto">
                 <button onclick="exportExcel()" class="flex-1 sm:flex-none justify-center bg-emerald-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 whitespace-nowrap">
@@ -34,7 +34,7 @@
     </div>
 
     {{-- Pagination Footer --}}
-    <div id="paginationBar" class="hidden bg-white rounded-[2rem] border shadow-sm px-8 py-5 flex items-center justify-between">
+    <div id="paginationBar" class="hidden bg-white rounded-[2rem] border-0 shadow-sm px-8 py-5 flex items-center justify-between">
         <p id="paginationInfo" class="text-[11px] text-gray-400 font-bold uppercase tracking-widest"></p>
         <div id="paginationBtns" class="flex items-center gap-2"></div>
     </div>
@@ -85,7 +85,7 @@
         const grid = document.getElementById('artikelGrid');
 
         if (filteredData.length === 0) {
-            grid.innerHTML = `<div class="col-span-full bg-white p-24 rounded-[2.5rem] border border-dashed text-center">
+            grid.innerHTML = `<div class="col-span-full bg-white p-24 rounded-[2.5rem] border-0 border-dashed text-center">
                 <i data-lucide="newspaper" class="mx-auto text-gray-200 mb-4" size="56"></i>
                 <p class="text-gray-400 font-bold uppercase text-xs tracking-widest mb-5">Belum ada artikel.</p>
                 <a href="/admin/artikel/tambah" class="bg-blue-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase hover:bg-blue-700 transition-all">+ Tulis Artikel Pertama</a>
@@ -105,7 +105,7 @@
                         : `<i data-lucide="newspaper" class="text-blue-100 group-hover:scale-110 transition-transform" size="52"></i>`
                     }
                     <div class="absolute bottom-3 left-4">
-                        <span class="bg-white/80 backdrop-blur-sm text-blue-700 text-[9px] font-black px-2.5 py-1 rounded-lg border border-blue-100 uppercase">${tanggal}</span>
+                        <span class="bg-white/80 backdrop-blur-sm text-blue-700 text-[9px] font-black px-2.5 py-1 rounded-lg border-0 border-blue-100 uppercase">${tanggal}</span>
                     </div>
                 </div>
                 <div class="p-6 flex flex-col flex-1">
@@ -141,7 +141,7 @@
         info.innerText = `Menampilkan ${start}–${end} dari ${total} artikel`;
 
         let html = `<button onclick="renderPage(${page - 1})" ${page === 1 ? 'disabled' : ''}
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border-0 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
             <i data-lucide="chevron-left" size="16"></i>
         </button>`;
         for (let p = 1; p <= totalPages; p++) {
@@ -150,12 +150,12 @@
                 continue;
             }
             html += `<button onclick="renderPage(${p})"
-                class="w-9 h-9 rounded-xl text-xs font-black transition-all ${p === page ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'text-gray-400 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'}">
+                class="w-9 h-9 rounded-xl text-xs font-black transition-all ${p === page ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'text-gray-400 border-0 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'}">
                 ${p}
             </button>`;
         }
         html += `<button onclick="renderPage(${page + 1})" ${page === totalPages ? 'disabled' : ''}
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+            class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border-0 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
             <i data-lucide="chevron-right" size="16"></i>
         </button>`;
 
@@ -191,7 +191,7 @@
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Data Artikel");
         
-        XLSX.writeFile(workbook, "data-artikel-sintas.xlsx");
+        XLSX.writeFile(workbook, "data-artikel-carehub.xlsx");
     }
 </script>
 @endsection

@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard - SINTAS')
+@section('title', 'Dashboard - CareHub')
 
 @section('content')
 <div class="space-y-6">
     <div class="flex justify-between items-center bg-white p-8 rounded-[2rem] shadow-sm">
         <div>
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Ringkasan Operasional</h3>
-            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">SINTAS {{ date('d F Y') }}</p>
+            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">CareHub {{ date('d F Y') }}</p>
         </div>
         <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
             <i data-lucide="layout-grid"></i>
@@ -36,7 +36,7 @@
                 <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase">Surplus</span>
             </div>
             <div class="mt-6">
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Saldo Kas SINTAS</p>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Saldo Kas CareHub</p>
                 <h3 id="statSaldoKas" class="text-3xl font-black text-slate-800">Rp 0</h3>
             </div>
         </div>

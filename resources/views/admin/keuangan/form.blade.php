@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Keuangan - SINTAS')
+@section('title', 'Keuangan - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -19,17 +19,17 @@
             </div>
             <div>
                 <h2 class="text-2xl font-black uppercase tracking-tighter">Tambah Transaksi</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">SINTAS Finance System</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub Finance System</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
-            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">SINTAS</p>
+            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">CareHub</p>
             <p id="tanggalHari" class="text-white font-black text-sm mt-1"></p>
         </div>
     </div>
 
     {{-- Form Full Width --}}
-    <div class="bg-white rounded-[2rem] border shadow-sm p-10">
+    <div class="bg-white rounded-[2rem] border-0 shadow-sm p-10">
         <form id="formKeuangan" class="space-y-6">
 
             {{-- Pilih Jenis Transaksi --}}
@@ -53,14 +53,14 @@
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Kategori <span class="text-rose-500">*</span></label>
                     <input type="text" id="kategori" placeholder="Donasi, Sembako, Gaji Pengurus, dll..."
-                        class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
+                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
                 </div>
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Nominal (Rp) <span class="text-rose-500">*</span></label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400 text-sm">Rp</span>
                         <input type="number" id="jumlah_nominal" placeholder="0" min="0"
-                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-black text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-xl" required>
+                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-black text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-xl" required>
                     </div>
                 </div>
             </div>
@@ -69,7 +69,7 @@
             <div class="space-y-2">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Keterangan (Opsional)</label>
                 <textarea id="keterangan" placeholder="Keterangan singkat tentang transaksi ini..." rows="3"
-                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm resize-none"></textarea>
+                    class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm resize-none"></textarea>
             </div>
 
             {{-- Actions --}}

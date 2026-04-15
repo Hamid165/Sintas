@@ -14,7 +14,7 @@ class DashboardController extends Controller
         // 1. Hitung Total Anak
         $totalAnak = AnakAsuh::count();
 
-        // 2. Hitung Saldo Kas SINTAS
+        // 2. Hitung Saldo Kas CareHub
         $totalMasuk = Transaksi::where('tipe', 'masuk')->sum('nominal');
         $totalKeluar = Transaksi::where('tipe', 'keluar')->sum('nominal');
         $saldoKas = $totalMasuk - $totalKeluar;

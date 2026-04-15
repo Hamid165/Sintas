@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Profil Admin - SINTAS')
+@section('title', 'Profil Admin - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -48,7 +48,7 @@
                 </div>
                 <div class="flex justify-between items-center border-b border-gray-50 pb-3">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email</span>
-                    <p id="emailDisplay" class="text-sm font-bold text-gray-800">admin@sintas.id</p>
+                    <p id="emailDisplay" class="text-sm font-bold text-gray-800">admin@carehub.id</p>
                 </div>
                 <div class="flex justify-between items-center border-b border-gray-50 pb-3">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</span>
@@ -85,12 +85,12 @@
                         <div class="space-y-2">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Nama Lengkap</label>
                             <input type="text" id="inputNama" placeholder="Nama Admin"
-                                class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                                class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Email</label>
                             <input type="email" id="inputEmail" placeholder="admin@email.com"
-                                class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                                class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
                         </div>
                     </div>
                     <div id="alertProfil" class="hidden p-4 rounded-2xl text-sm font-bold"></div>
@@ -117,7 +117,7 @@
                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Password Saat Ini</label>
                         <div class="relative">
                             <input type="password" id="passwordLama" placeholder="••••••••"
-                                class="w-full p-4 pr-12 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                                class="w-full p-4 pr-12 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
                             <button type="button" onclick="togglePass('passwordLama', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
                                 <i data-lucide="eye" size="18"></i>
                             </button>
@@ -128,7 +128,7 @@
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Password Baru</label>
                             <div class="relative">
                                 <input type="password" id="passwordBaru" placeholder="Min. 8 karakter"
-                                    class="w-full p-4 pr-12 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                                    class="w-full p-4 pr-12 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
                                 <button type="button" onclick="togglePass('passwordBaru', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
                                     <i data-lucide="eye" size="18"></i>
                                 </button>
@@ -138,7 +138,7 @@
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Konfirmasi Password</label>
                             <div class="relative">
                                 <input type="password" id="passwordKonfirmasi" placeholder="Ulangi password baru"
-                                    class="w-full p-4 pr-12 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                                    class="w-full p-4 pr-12 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
                                 <button type="button" onclick="togglePass('passwordKonfirmasi', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
                                     <i data-lucide="eye" size="18"></i>
                                 </button>
@@ -169,7 +169,7 @@
 
     function showAlert(elId, msg, isSuccess) {
         const el = document.getElementById(elId);
-        el.className = `p-4 rounded-2xl text-sm font-bold ${isSuccess ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`;
+        el.className = `p-4 rounded-2xl text-sm font-bold ${isSuccess ? 'bg-emerald-50 text-emerald-700 border-0 border-emerald-100' : 'bg-rose-50 text-rose-700 border-0 border-rose-100'}`;
         el.innerText = msg;
         el.classList.remove('hidden');
         setTimeout(() => el.classList.add('hidden'), 4000);
@@ -203,7 +203,7 @@
             if(res.ok) {
                 const user = await res.json();
                 document.getElementById('namaDisplay').innerText = user.name || 'Administrator';
-                document.getElementById('emailDisplay').innerText = user.email || 'admin@sintas.id';
+                document.getElementById('emailDisplay').innerText = user.email || 'admin@carehub.id';
                 document.getElementById('inputNama').value = user.name || '';
                 document.getElementById('inputEmail').value = user.email || '';
                 

@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Inventaris - SINTAS')
+@section('title', 'Inventaris - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -19,25 +19,25 @@
             </div>
             <div>
                 <h2 id="formTitle" class="text-2xl font-black uppercase tracking-tighter">Tambah Barang Inventaris</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">SINTAS Inventory System</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub Inventory System</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
-            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">SINTAS</p>
+            <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">CareHub</p>
             <p id="tanggalHari" class="text-white font-black text-sm mt-1"></p>
         </div>
     </div>
 
     {{-- Form Full Width --}}
     {{-- Kolom DB: nama_barang | stok | kondisi | kategori | gambar (nullable) --}}
-    <div class="bg-white rounded-[2rem] border shadow-sm p-10">
+    <div class="bg-white rounded-[2rem] border-0 shadow-sm p-10">
         <form id="formInventori" class="space-y-6">
 
             {{-- Row 1: Nama Barang --}}
             <div class="space-y-2">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Nama Barang <span class="text-rose-500">*</span></label>
                 <input type="text" id="nama_barang" placeholder="Contoh: Beras Premium, Sabun Mandi, dll..."
-                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
+                    class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm" required>
             </div>
 
             {{-- Row 2: Stok + Kondisi + Kategori --}}
@@ -45,11 +45,11 @@
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Jumlah Stok <span class="text-rose-500">*</span></label>
                     <input type="number" id="stok" placeholder="0" min="0"
-                        class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-xl" required>
+                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-xl" required>
                 </div>
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Kondisi Barang <span class="text-rose-500">*</span></label>
-                    <select id="kondisi" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none appearance-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all">
+                    <select id="kondisi" class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none appearance-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all">
                         <option value="Baik">Baik</option>
                         <option value="Cukup Baik">Cukup Baik</option>
                         <option value="Rusak Ringan">Rusak Ringan</option>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Kategori <span class="text-rose-500">*</span></label>
-                    <select id="kategori" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-800 outline-none appearance-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all">
+                    <select id="kategori" class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none appearance-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all">
                         <option value="Sembako">Sembako / Dapur</option>
                         <option value="Kebutuhan Mandi">Kebutuhan Mandi & Kebersihan</option>
                         <option value="Pakaian">Pakaian & Tekstil</option>
