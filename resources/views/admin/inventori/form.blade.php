@@ -19,7 +19,7 @@
             </div>
             <div>
                 <h2 id="formTitle" class="text-2xl font-black uppercase tracking-tighter">Tambah Barang Inventaris</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub Inventory System</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">Inventaris Database</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
@@ -86,7 +86,13 @@
                     </div>
                     <input type="file" id="gambar" accept="image/*" class="hidden" onchange="previewGambar(this)">
                 </div>
-                <p id="namaFile" class="text-[10px] text-gray-400 font-bold hidden"></p>
+                <div id="fileInfo" class="hidden flex items-center gap-3 bg-blue-50 border-0 border-blue-100 rounded-2xl px-4 py-3">
+                    <i data-lucide="image" size="16" class="text-blue-500"></i>
+                    <span id="namaFile" class="text-xs font-black text-blue-700"></span>
+                    <button type="button" onclick="hapusGambar()" class="ml-auto text-rose-400 hover:text-rose-600 transition-colors">
+                        <i data-lucide="x" size="16"></i>
+                    </button>
+                </div>
             </div>
 
             {{-- Actions --}}
@@ -123,11 +129,21 @@
                 document.getElementById('previewImg').src = e.target.result;
                 document.getElementById('previewWrap').classList.remove('hidden');
                 document.getElementById('uploadPlaceholder').classList.add('hidden');
-                document.getElementById('namaFile').textContent = '📎 ' + file.name;
-                document.getElementById('namaFile').classList.remove('hidden');
+                document.getElementById('namaFile').textContent = file.name;
+                document.getElementById('fileInfo').classList.remove('hidden');
+                document.getElementById('fileInfo').classList.add('flex');
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    function hapusGambar() {
+        document.getElementById('gambar').value = '';
+        document.getElementById('previewImg').src = '';
+        document.getElementById('previewWrap').classList.add('hidden');
+        document.getElementById('uploadPlaceholder').classList.remove('hidden');
+        document.getElementById('fileInfo').classList.add('hidden');
+        document.getElementById('fileInfo').classList.remove('flex');
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -149,8 +165,9 @@
                     document.getElementById('previewImg').src = '/storage/' + data.gambar;
                     document.getElementById('previewWrap').classList.remove('hidden');
                     document.getElementById('uploadPlaceholder').classList.add('hidden');
-                    document.getElementById('namaFile').textContent = '📷 Gambar sudah ada (upload baru untuk mengganti)';
-                    document.getElementById('namaFile').classList.remove('hidden');
+                    document.getElementById('namaFile').textContent = 'Gambar tersimpan (upload baru untuk mengganti)';
+                    document.getElementById('fileInfo').classList.remove('hidden');
+                    document.getElementById('fileInfo').classList.add('flex');
                 }
             } catch(e) { console.error(e); }
         }
@@ -186,7 +203,7 @@
         try {
             const res = await fetch(url, { method, headers: getAuthHeaders(), body: formData });
             if(res.ok) {
-                const msg = editId ? 'Barang berhasil diperbarui!' : 'Barang baru berhasil ditambahkan!';
+                const msg = editId ? 'Data barang berhasil disimpan!' : 'Data barang berhasil ditambahkan!';
                 window.location.href = '/admin/inventori?toast=' + encodeURIComponent(msg);
             } else {
                 const err = await res.json();

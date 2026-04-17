@@ -56,13 +56,13 @@
     </div>
 
     <div class="bg-white rounded-[2.5rem] shadow-sm overflow-hidden">
-        <div class="p-8 border-b bg-gray-50/50 flex justify-between items-center">
+        <div class="p-8 border-b border-[#D1D5DC] bg-gray-50/50 flex justify-between items-center">
             <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-800">Aktivitas Keuangan Terbaru</h4>
             <a href="{{ route('admin.keuangan') }}" class="text-[10px] font-black text-blue-600 uppercase hover:underline">Lihat Semua →</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left whitespace-nowrap">
-                <thead class="bg-gray-50 text-[10px] font-black text-slate-800 uppercase border-b border-gray-100">
+                <thead class="bg-gray-50 text-[10px] font-black text-slate-800 uppercase border-b border-[#D1D5DC]">
                     <tr>
                         <th class="px-6 py-4">#</th>
                         <th class="px-6 py-4">Tanggal</th>

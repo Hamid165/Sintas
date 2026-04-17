@@ -19,7 +19,7 @@
             </div>
             <div>
                 <h2 id="formTitle" class="text-2xl font-black uppercase tracking-tighter">Tulis Artikel Baru</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub CMS Engine</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">Artikel Database</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
@@ -187,7 +187,7 @@
         try {
             const res = await fetch(url, { method, headers: getAuthHeaders(), body: formData });
             if(res.ok) {
-                const msg = editId ? 'Artikel berhasil diperbarui!' : 'Artikel baru berhasil dipublish!';
+                const msg = editId ? 'Data artikel berhasil disimpan!' : 'Data artikel berhasil ditambahkan!';
                 window.location.href = '/admin/artikel?toast=' + encodeURIComponent(msg);
             } else {
                 const err = await res.json();

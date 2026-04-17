@@ -75,7 +75,7 @@
         </aside>
 
         <div class="flex-1 flex flex-col h-full overflow-hidden">
-            <header class="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-40">
+            <header class="h-16 bg-white border-b border-[#D1D5DC] px-8 flex items-center justify-between sticky top-0 z-40">
                 <div class="flex items-center gap-4">
                     <button onclick="toggleSidebar()" class="p-2 text-slate-400 transition-colors hover:bg-gray-50 rounded-xl">
                         <i data-lucide="menu" size="20"></i>

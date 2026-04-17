@@ -19,7 +19,7 @@
             </div>
             <div>
                 <h2 class="text-2xl font-black uppercase tracking-tighter">Tambah Transaksi</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub Finance System</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">Keuangan Database</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
@@ -136,7 +136,7 @@
         try {
             const res = await fetch('/api/keuangan', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
             if(res.ok) {
-                window.location.href = '/admin/keuangan?toast=' + encodeURIComponent('Transaksi berhasil disimpan!');
+                window.location.href = '/admin/keuangan?toast=' + encodeURIComponent('Data transaksi berhasil ditambahkan!');
             } else {
                 showToast('Gagal menyimpan transaksi.', 'error');
                 btn.disabled = false;

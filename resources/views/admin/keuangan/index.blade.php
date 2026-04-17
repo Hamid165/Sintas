@@ -58,15 +58,15 @@
 
     {{-- Table --}}
     <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden w-full">
-        <div class="p-6 border-b bg-gray-50/50 flex items-center justify-between">
+        <div class="p-6 border-b border-[#D1D5DC] bg-gray-50/50 flex items-center justify-between">
             <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-800">Riwayat Transaksi</h4>
             <span id="totalTrx" class="text-[10px] font-black text-gray-400 uppercase">0 transaksi</span>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left whitespace-nowrap">
-                <thead class="bg-gray-50 text-[10px] font-black text-slate-800 uppercase border-b border-gray-100">
+                <thead class="bg-gray-50 text-[10px] font-black text-slate-800 uppercase border-b border-[#D1D5DC]">
                     <tr>
-                        <th class="px-6 py-5 w-8">#</th>
+                        <th class="px-6 py-5 w-8">No</th>
                         <th class="px-6 py-5">Tanggal</th>
                         <th class="px-6 py-5">Kategori</th>
                         <th class="px-6 py-5">Keterangan</th>
@@ -85,7 +85,7 @@
         </div>
 
         {{-- Pagination Footer --}}
-        <div id="paginationBar" class="hidden px-8 py-5 border-t bg-gray-50/50 flex items-center justify-between">
+        <div id="paginationBar" class="hidden px-8 py-5 border-t border-[#D1D5DC] bg-gray-50/50 flex items-center justify-between">
             <p id="paginationInfo" class="text-[11px] text-gray-400 font-bold uppercase tracking-widest"></p>
             <div id="paginationBtns" class="flex items-center gap-2"></div>
         </div>
@@ -241,7 +241,7 @@
         const dataToExport = filteredData.map((t, index) => {
             const tgl = new Date(t.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
             return {
-                '#': index + 1,
+                'No': index + 1,
                 'Tanggal': tgl,
                 'Kategori': t.kategori || '-',
                 'Keterangan': t.keterangan || '-',

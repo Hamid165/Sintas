@@ -19,7 +19,7 @@
             </div>
             <div>
                 <h2 id="formTitle" class="text-2xl font-black uppercase tracking-tighter">Tambah Anak Baru</h2>
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">CareHub Database System</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">Manajemen Anak Database</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
@@ -146,7 +146,7 @@
         try {
             const res = await fetch(url, { method, headers: getAuthHeaders(), body: JSON.stringify(payload) });
             if(res.ok) {
-                const msg = editId ? 'Data anak berhasil diperbarui!' : 'Data anak baru berhasil disimpan!';
+                const msg = editId ? 'Data anak berhasil disimpan!' : 'Data anak berhasil ditambahkan!';
                 window.location.href = '/admin/anak?toast=' + encodeURIComponent(msg);
             } else {
                 const err = await res.json();

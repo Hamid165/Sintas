@@ -17,7 +17,7 @@
         </div>
         <div class="text-right hidden md:block">
             <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">Role</p>
-            <p class="text-white font-black text-sm mt-1">🔐 Super Admin</p>
+            <p class="text-white font-black text-sm mt-1">Super Admin</p>
         </div>
     </div>
 
