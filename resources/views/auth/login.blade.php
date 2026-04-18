@@ -22,8 +22,8 @@
                 <div class="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-blue-200 mb-4 p-2.5">
                     <img src="/icon.svg" alt="CareHub Logo" class="w-full h-full object-contain">
                 </div>
-                <h1 class="text-3xl font-black tracking-tighter"><span class="bg-blue-900 px-2 py-0.5 rounded-l-xl text-white">Care</span><span class="text-blue-600 bg-blue-100 px-2 py-0.5 rounded-r-xl">Hub</span> Admin</h1>
-                <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">Sistem Manajemen Terpadu</p>
+                <h1 class="text-4xl font-black tracking-tighter"><span class="text-black">Care</span><span class="text-blue-600">Hub</span></h1>
+                <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">Cahaya Asuhan Ruang Empati</p>
             </div>
 
             <form id="loginForm" class="space-y-5">
@@ -45,7 +45,10 @@
                             <i data-lucide="lock" size="18"></i>
                         </div>
                         <input type="password" id="password" placeholder="••••••••" required
-                            class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
+                            class="w-full pl-12 pr-12 py-4 bg-gray-50 border-0 rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
+                        <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400/50 hover:text-blue-600 transition-all cursor-pointer focus:outline-none">
+                            <i data-lucide="eye-off" size="18" id="eyeIcon"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -60,13 +63,26 @@
                 </button>
             </form>
 
-            <div class="text-center pt-4 border-t border-dashed border-gray-100">
+            <!-- <div class="text-center pt-4 border-t border-dashed border-gray-100">
                 <p class="text-[9px] text-gray-300 font-bold uppercase tracking-widest">Prototype v2.5 • Purwokerto Software House</p>
-            </div>
+            </div> -->
         </div>
     </div>
     <script>
         lucide.createIcons();
+
+        // Toggle Password Logic
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function() {
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            // Re-render icon dynamically to fix persistence issues
+            togglePassword.innerHTML = `<i data-lucide="${isPassword ? 'eye' : 'eye-off'}" size="18"></i>`;
+            lucide.createIcons();
+        });
 
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
