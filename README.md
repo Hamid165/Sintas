@@ -97,7 +97,3 @@ Ikuti instruksi di bawah untuk menjalankan CareHub di komputer kamu (Laragon / X
 7. **Akses Aplikasi**
    Silakan buka Web Browser (Chrome, Edge, Firefox), dan akses alamat:
    `http://127.0.0.1:8000` atau `http://localhost:8000`
-
----
-
-*Dokumentasi ini ditulis untuk mempermudah Setup Lokal dan Evaluasi Project (Tugas Akhir/UAS).*
