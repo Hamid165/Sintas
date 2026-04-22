@@ -92,6 +92,9 @@ Ikuti instruksi di bawah untuk menjalankan CareHub di komputer kamu (Laragon / X
    composer run dev
    ```
 
+   Email	admin@CareHub.com
+   Password	password123
+
    *(Atau secara terpisah)*:
    Buka terminal 1 jalankan `php artisan serve`, buka terminal 2 jalankan `npm run dev`.
 7. **Akses Aplikasi**

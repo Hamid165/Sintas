@@ -8,6 +8,15 @@ use Illuminate\Http\Request;
 class KeuanganController extends Controller
 {
     /**
+     * Get all keuangan for API
+     */
+    public function getAll()
+    {
+        $data = Keuangan::orderBy('created_at', 'desc')->get();
+        return response()->json($data);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index()

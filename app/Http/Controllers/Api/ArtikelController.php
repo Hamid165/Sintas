@@ -3,67 +3,73 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Artikel;
+use App\Models\KunjunganTamu;
 use Illuminate\Http\Request;
 
 class ArtikelController extends Controller
 {
     public function index()
     {
-        return response()->json(Artikel::latest()->get());
+        return response()->json(KunjunganTamu::latest()->get());
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'judul'            => 'required|string|max:255',
-            'deskripsi_konten' => 'required|string',
-            'gambar_konten'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'judul_kegiatan'     => 'required|string|max:255',
+            'nama_tamu'          => 'required|string|max:255',
+            'tanggal_pelaksanaan' => 'required|date',
+            'deskripsi_laporan'  => 'required|string',
+            'foto_kegiatan'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'nomor_surat_ref'    => 'nullable|string|max:255',
         ]);
 
-        if ($request->hasFile('gambar_konten')) {
-            $validated['gambar_konten'] = $request->file('gambar_konten')->store('artikel', 'public');
+        if ($request->hasFile('foto_kegiatan')) {
+            $validated['foto_kegiatan'] = $request->file('foto_kegiatan')->store('kunjungan', 'public');
         }
 
-        $artikel = Artikel::create($validated);
-        return response()->json($artikel, 201);
+        $kunjungan = KunjunganTamu::create($validated);
+        return response()->json($kunjungan, 201);
     }
 
     public function show($id)
     {
-        $artikel = Artikel::findOrFail($id);
-        return response()->json($artikel);
+        $kunjungan = KunjunganTamu::findOrFail($id);
+        return response()->json($kunjungan);
     }
 
     public function update(Request $request, $id)
     {
-        $artikel = Artikel::findOrFail($id);
+        $kunjungan = KunjunganTamu::findOrFail($id);
 
         $data = $request->validate([
-            'judul'            => 'sometimes|required|string|max:255',
-            'deskripsi_konten' => 'sometimes|required|string',
-            'gambar_konten'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'judul_kegiatan'     => 'sometimes|required|string|max:255',
+            'nama_tamu'          => 'sometimes|required|string|max:255',
+            'tanggal_pelaksanaan' => 'sometimes|required|date',
+            'deskripsi_laporan'  => 'sometimes|required|string',
+            'foto_kegiatan'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'nomor_surat_ref'    => 'nullable|string|max:255',
         ]);
 
-        if ($request->hasFile('gambar_konten')) {
+        if ($request->hasFile('foto_kegiatan')) {
             // Hapus gambar lama jika ada
-            if ($artikel->gambar_konten && \Storage::disk('public')->exists($artikel->gambar_konten)) {
-                \Storage::disk('public')->delete($artikel->gambar_konten);
+            if ($kunjungan->foto_kegiatan && \Storage::disk('public')->exists($kunjungan->foto_kegiatan)) {
+                \Storage::disk('public')->delete($kunjungan->foto_kegiatan);
             }
-            $data['gambar_konten'] = $request->file('gambar_konten')->store('artikel', 'public');
+            $data['foto_kegiatan'] = $request->file('foto_kegiatan')->store('kunjungan', 'public');
         }
 
-        $artikel->update($data);
-        return response()->json($artikel);
+        $kunjungan->update($data);
+        return response()->json($kunjungan);
     }
 
     public function destroy($id)
     {
-        $artikel = Artikel::findOrFail($id);
-        if ($artikel->gambar_konten && \Storage::disk('public')->exists($artikel->gambar_konten)) {
-            \Storage::disk('public')->delete($artikel->gambar_konten);
+        $kunjungan = KunjunganTamu::findOrFail($id);
+        if ($kunjungan->foto_kegiatan && \Storage::disk('public')->exists($kunjungan->foto_kegiatan)) {
+            \Storage::disk('public')->delete($kunjungan->foto_kegiatan);
         }
-        $artikel->delete();
+        $kunjungan->delete();
         return response()->json(['message' => 'Data berhasil dihapus']);
     }
 }

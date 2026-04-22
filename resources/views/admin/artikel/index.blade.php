@@ -1,13 +1,13 @@
 @extends('layouts.admin')
-@section('title', 'Artikel & CMS - CareHub')
+@section('title', 'Kunjungan Tamu - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
 
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm gap-4">
         <div class="w-full lg:w-auto">
-            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Artikel & CMS</h3>
-            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Total: <span id="statArtikel">0</span> Artikel Dipublish</p>
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Kunjungan Tamu</h3>
+            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Total: <span id="statArtikel">0</span> Kunjungan</p>
         </div>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
             <div class="relative w-full sm:w-auto">
@@ -18,7 +18,7 @@
                 <button onclick="exportExcel()" class="flex-1 sm:flex-none justify-center bg-emerald-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="file-spreadsheet" size="16"></i> Export
                 </button>
-                <a href="{{ route('admin.artikel.tambah') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
+                <a href="{{ route('admin.kunjungan.tambah') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="plus" size="16"></i> Tambah
                 </a>
             </div>
@@ -60,8 +60,9 @@
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const keyword = e.target.value.toLowerCase();
             filteredData = allData.filter(a => 
-                (a.judul || '').toLowerCase().includes(keyword) ||
-                (a.deskripsi_konten || '').toLowerCase().includes(keyword)
+                (a.judul_kegiatan || '').toLowerCase().includes(keyword) ||
+                (a.nama_tamu || '').toLowerCase().includes(keyword) ||
+                (a.deskripsi_laporan || '').toLowerCase().includes(keyword)
             );
             document.getElementById('statArtikel').innerText = filteredData.length;
             renderPage(1);
@@ -86,33 +87,33 @@
 
         if (filteredData.length === 0) {
             grid.innerHTML = `<div class="col-span-full bg-white p-24 rounded-[2.5rem] border-0 border-dashed text-center">
-                <i data-lucide="newspaper" class="mx-auto text-gray-200 mb-4" size="56"></i>
-                <p class="text-gray-400 font-bold uppercase text-xs tracking-widest mb-5">Belum ada artikel.</p>
-                <a href="/admin/artikel/tambah" class="bg-blue-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase hover:bg-blue-700 transition-all">+ Tulis Artikel Pertama</a>
+                <i data-lucide="users" class="mx-auto text-gray-200 mb-4" size="56"></i>
+                <p class="text-gray-400 font-bold uppercase text-xs tracking-widest mb-5">Belum ada kunjungan tamu.</p>
+                <a href="/admin/kunjungan/tambah" class="bg-blue-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase hover:bg-blue-700 transition-all">+ Tambah Kunjungan Tamu</a>
             </div>`;
             lucide.createIcons(); return;
         }
 
         grid.innerHTML = pageData.map(a => {
-            const tanggal = new Date(a.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
-            const preview = (a.deskripsi_konten || '').replace(/<[^>]*>?/gm, '').substring(0, 120);
-            const hasGambar = a.gambar_konten && a.gambar_konten.trim() !== '';
+            const tanggal = new Date(a.tanggal_pelaksanaan || a.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+            const preview = (a.deskripsi_laporan || '').replace(/<[^>]*>?/gm, '').substring(0, 120);
+            const hasGambar = a.foto_kegiatan && a.foto_kegiatan.trim() !== '';
             return `
             <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col group">
                 <div class="h-44 ${hasGambar ? '' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'} flex items-center justify-center relative shrink-0 overflow-hidden">
                     ${hasGambar
-                        ? `<img src="/storage/${a.gambar_konten}" alt="${a.judul}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
-                        : `<i data-lucide="newspaper" class="text-blue-100 group-hover:scale-110 transition-transform" size="52"></i>`
+                        ? `<img src="/storage/${a.foto_kegiatan}" alt="${a.judul_kegiatan}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                        : `<i data-lucide="users" class="text-blue-100 group-hover:scale-110 transition-transform" size="52"></i>`
                     }
                     <div class="absolute bottom-3 left-4">
                         <span class="bg-white/80 backdrop-blur-sm text-blue-700 text-[9px] font-black px-2.5 py-1 rounded-lg border-0 border-blue-100 uppercase">${tanggal}</span>
                     </div>
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <h3 class="font-black text-gray-800 leading-tight text-base mb-2 line-clamp-2">${a.judul}</h3>
-                    <p class="text-gray-400 text-xs leading-relaxed line-clamp-3 flex-1">${preview}${preview.length >= 120 ? '...' : ''}</p>
+                    <h3 class="font-black text-gray-800 leading-tight text-base mb-2 line-clamp-2">${a.judul_kegiatan}</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed line-clamp-3 flex-1">Tamu: ${a.nama_tamu}<br>${preview}${preview.length >= 120 ? '...' : ''}</p>
                     <div class="mt-5 pt-4 border-t border-gray-50 flex justify-between items-center">
-                        <a href="/admin/artikel/tambah?id=${a.id}" class="flex items-center gap-1.5 text-blue-500 font-black text-[10px] uppercase hover:text-blue-700 transition-colors">
+                        <a href="/admin/kunjungan/tambah?id=${a.id}" class="flex items-center gap-1.5 text-blue-500 font-black text-[10px] uppercase hover:text-blue-700 transition-colors">
                             <i data-lucide="edit-3" size="12"></i> Edit
                         </a>
                         <button onclick="hapusArtikel(${a.id})" class="flex items-center gap-1.5 text-rose-400 font-black text-[10px] uppercase hover:text-rose-600 transition-colors">
@@ -138,7 +139,7 @@
 
         const start = (page - 1) * PER_PAGE + 1;
         const end = Math.min(page * PER_PAGE, total);
-        info.innerText = `Menampilkan ${start}–${end} dari ${total} artikel`;
+        info.innerText = `Menampilkan ${start}–${end} dari ${total} kunjungan`;
 
         let html = `<button onclick="renderPage(${page - 1})" ${page === 1 ? 'disabled' : ''}
             class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 border-0 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
@@ -164,34 +165,36 @@
     }
 
     async function hapusArtikel(id) {
-        const ok = await showConfirm('Hapus artikel ini secara permanen?');
+        const ok = await showConfirm('Hapus kunjungan tamu ini secara permanen?');
         if (!ok) return;
         try {
             await fetch(`/api/artikel/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
-            showToast('Artikel berhasil dihapus.', 'success');
+            showToast('Kunjungan tamu berhasil dihapus.', 'success');
             loadArtikel();
-        } catch(e) { showToast('Gagal menghapus artikel.', 'error'); }
+        } catch(e) { showToast('Gagal menghapus kunjungan tamu.', 'error'); }
     }
 
     function exportExcel() {
         if(filteredData.length === 0) return showToast('Tidak ada data yang bisa diekspor.', 'warning');
         
         const dataToExport = filteredData.map((a, index) => {
-            const tgl = new Date(a.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
-            const textContent = (a.deskripsi_konten || '').replace(/<[^>]*>?/gm, '');
+            const tgl = new Date(a.tanggal_pelaksanaan || a.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
+            const textContent = (a.deskripsi_laporan || '').replace(/<[^>]*>?/gm, '');
             return {
                 '#': index + 1,
-                'Judul Artikel': a.judul || '-',
-                'Tanggal Dipublish': tgl,
-                'Deskripsi Konten': textContent
+                'Judul Kegiatan': a.judul_kegiatan || '-',
+                'Nama Tamu': a.nama_tamu || '-',
+                'Tanggal Pelaksanaan': tgl,
+                'Deskripsi Laporan': textContent,
+                'Nomor Surat Ref': a.nomor_surat_ref || '-'
             };
         });
 
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Data Artikel");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data Kunjungan Tamu");
         
-        XLSX.writeFile(workbook, "data-artikel-carehub.xlsx");
+        XLSX.writeFile(workbook, "data-kunjungan-tamu-carehub.xlsx");
     }
 </script>
 @endsection

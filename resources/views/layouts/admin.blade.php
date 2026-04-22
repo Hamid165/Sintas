@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'CareHub Admin')</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- SheetJS for Excel Export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -60,10 +64,16 @@
                     <span class="font-black text-xs uppercase tracking-widest">Inventaris</span>
                 </a>
 
-                <a href="{{ route('admin.artikel') }}" 
-                class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.artikel*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-                    <i data-lucide="newspaper" size="20"></i>
-                    <span class="font-black text-xs uppercase tracking-widest">Artikel & CMS</span>
+                <a href="{{ route('admin.kunjungan') }}" 
+                class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.kunjungan*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                    <i data-lucide="users-round" size="20"></i>
+                    <span class="font-black text-xs uppercase tracking-widest">Kunjungan Tamu</span>
+                </a>
+
+                <a href="{{ route('admin.audit') }}" 
+                class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.audit*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                    <i data-lucide="shield-check" size="20"></i>
+                    <span class="font-black text-xs uppercase tracking-widest">Audit</span>
                 </a>
             </nav>
 
@@ -90,8 +100,10 @@
                             Keuangan
                         @elseif(request()->routeIs('admin.inventori*'))
                             Inventaris
-                        @elseif(request()->routeIs('admin.artikel*'))
-                            Artikel & CMS
+                        @elseif(request()->routeIs('admin.kunjungan*'))
+                            Kunjungan Tamu
+                        @elseif(request()->routeIs('admin.audit*'))
+                            Audit
                         @elseif(request()->routeIs('admin.profil'))
                             Profil Admin
                         @else
@@ -271,7 +283,206 @@
     <style>
         @keyframes toastIn  { from { opacity:0; transform: translateY(1rem) scale(.95) } to { opacity:1; transform: translateY(0) scale(1) } }
         @keyframes toastOut { from { opacity:1; transform: translateY(0) scale(1) } to { opacity:0; transform: translateY(1rem) scale(.95) } }
+        @keyframes exportModalIn { from { opacity:0; transform: scale(0.92) translateY(-16px); } to { opacity:1; transform: scale(1) translateY(0); } }
+        .export-modal-card { animation: exportModalIn 0.3s cubic-bezier(.34,1.56,.64,1) forwards; }
     </style>
+
+    <!-- ── Global Export Modal ───────────────────────────────────────── -->
+    <div id="exportModal" class="fixed inset-0 z-[9990] hidden items-center justify-center p-4" style="background: rgba(15,23,42,0.55); backdrop-filter: blur(6px);">
+        <div class="export-modal-card bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center relative">
+            <!-- Icon -->
+            <div class="w-16 h-16 bg-teal-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+            </div>
+            <!-- Title -->
+            <h3 class="font-black text-slate-800 text-lg tracking-tight mb-1">EKSPOR LAPORAN RESMI</h3>
+            <p id="exportModalSubtitle" class="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 mb-7">MODUL AKTIF: —</p>
+            <!-- Buttons -->
+            <div class="space-y-3">
+                <button id="exportBtnPdf"
+                    class="w-full flex items-center justify-center gap-3 bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg shadow-rose-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Unduh PDF
+                </button>
+                <button id="exportBtnExcel"
+                    class="w-full flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg shadow-emerald-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Unduh Excel
+                </button>
+                <button id="exportBtnCsv"
+                    class="w-full flex items-center justify-center gap-3 bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg shadow-blue-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    Unduh CSV
+                </button>
+            </div>
+            <!-- Close -->
+            <button onclick="closeExportModal()" class="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-gray-600 transition-colors">Kembali</button>
+        </div>
+    </div>
+
+    <script>
+    // ─── Global Export Modal System ─────────────────────────────────────────────
+    let _exportCallbacks = { pdf: null, excel: null, csv: null };
+
+    function openExportModal(subtitle, callbacks) {
+        _exportCallbacks = callbacks;
+        document.getElementById('exportModalSubtitle').textContent = 'MODUL AKTIF: ' + subtitle.toUpperCase();
+        const modal = document.getElementById('exportModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        const card = modal.querySelector('.export-modal-card');
+        card.style.animation = 'none';
+        requestAnimationFrame(() => { card.style.animation = ''; });
+    }
+
+    function closeExportModal() {
+        const modal = document.getElementById('exportModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.getElementById('exportBtnPdf').onclick   = () => { closeExportModal(); _exportCallbacks.pdf   && _exportCallbacks.pdf(); };
+    document.getElementById('exportBtnExcel').onclick = () => { closeExportModal(); _exportCallbacks.excel && _exportCallbacks.excel(); };
+    document.getElementById('exportBtnCsv').onclick   = () => { closeExportModal(); _exportCallbacks.csv   && _exportCallbacks.csv(); };
+    document.getElementById('exportModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeExportModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeExportModal(); });
+
+    // ─── PDF Builder ─────────────────────────────────────────────────────────────
+    function buildPdf({ title, module, columns, rows, filename }) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const W = doc.internal.pageSize.getWidth();
+        const H = doc.internal.pageSize.getHeight();
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+        const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+
+        // Header band
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, 0, W, 28, 'F');
+        doc.setFillColor(37, 99, 235);
+        doc.rect(0, 28, W, 3, 'F');
+
+        // Logo circle
+        doc.setFillColor(37, 99, 235);
+        doc.roundedRect(10, 6, 16, 16, 3, 3, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('CH', 18, 16.5, { align: 'center' });
+
+        // Brand name
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Care', 30, 12);
+        doc.setTextColor(96, 165, 250);
+        doc.text('Hub', 30 + doc.getTextWidth('Care'), 12);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184);
+        doc.text('ADMIN PANEL  ·  LAPORAN RESMI', 30, 18);
+
+        // Right: timestamp
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Dicetak: ${dateStr}, ${timeStr}`, W - 10, 12, { align: 'right' });
+        doc.text(`Modul: ${module}`, W - 10, 18, { align: 'right' });
+
+        // Sub-header strip
+        doc.setFillColor(248, 250, 252);
+        doc.rect(0, 31, W, 16, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(15, 23, 42);
+        doc.text(title.toUpperCase(), 10, 42);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Total data: ${rows.length} baris`, W - 10, 42, { align: 'right' });
+
+        // Table
+        doc.autoTable({
+            startY: 50,
+            head: [columns],
+            body: rows,
+            styles: {
+                font: 'helvetica', fontSize: 8,
+                cellPadding: { top: 4, bottom: 4, left: 5, right: 5 },
+                textColor: [30, 41, 59],
+                lineColor: [226, 232, 240], lineWidth: 0.3,
+            },
+            headStyles: {
+                fillColor: [15, 23, 42], textColor: [255, 255, 255],
+                fontStyle: 'bold', fontSize: 7.5, halign: 'left',
+            },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
+            columnStyles: { 0: { halign: 'center', fontStyle: 'bold', cellWidth: 10 } },
+            margin: { left: 10, right: 10 },
+            tableLineColor: [226, 232, 240], tableLineWidth: 0.3,
+        });
+
+        // Footer on each page
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPages; p++) {
+            doc.setPage(p);
+            doc.setFillColor(15, 23, 42);
+            doc.rect(0, H - 10, W, 10, 'F');
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(6.5);
+            doc.setTextColor(148, 163, 184);
+            doc.text('© CareHub Admin  ·  Dokumen ini digenerate otomatis oleh sistem', 10, H - 3.5);
+            doc.text(`Halaman ${p} / ${totalPages}`, W - 10, H - 3.5, { align: 'right' });
+        }
+
+        doc.save(filename);
+    }
+
+    // ─── Excel Builder ────────────────────────────────────────────────────────────
+    function buildExcel({ title, module, headers, rows, filename }) {
+        const now = new Date();
+        const dateStr = now.toLocaleString('id-ID');
+
+        // Meta rows
+        const metaRows = [
+            ['CareHub Admin – Laporan Resmi'],
+            [`Modul: ${module}`],
+            [`Dicetak: ${dateStr}`],
+            [`Total Data: ${rows.length} baris`],
+            [], // blank spacer
+            headers,
+            ...rows
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(metaRows);
+
+        // Column widths
+        const colW = headers.map((h, i) => ({ wch: i === 0 ? 6 : Math.max(h.length + 4, 18) }));
+        ws['!cols'] = colW;
+
+        // Merge title cell across all columns
+        ws['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:headers.length-1} }];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, module.substring(0, 31));
+        XLSX.writeFile(wb, filename);
+    }
+
+    // ─── CSV Builder ──────────────────────────────────────────────────────────────
+    function buildCsv(headers, rows, filename) {
+        const BOM = '\uFEFF';
+        const esc = (v) => {
+            const s = String(v ?? '');
+            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const lines = [headers.map(esc).join(','), ...rows.map(r => r.map(esc).join(','))];
+        const blob = new Blob([BOM + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    </script>
     @stack('scripts')
 </body>
 </html>
