@@ -132,4 +132,44 @@ class KunjunganTamuController extends Controller
             'surat_keluar' => $keluar,
         ]);
     }
+
+    /**
+     * Generate description using AI based on short points.
+     */
+    public function generateAiDescription(Request $request)
+    {
+        $request->validate([
+            'poin_poin' => 'required|string',
+        ]);
+
+        $apiKey = env('GEMINI_API_KEY');
+
+        if (!$apiKey) {
+            return response()->json(['message' => 'API Key AI (Gemini) belum dikonfigurasi di .env.'], 500);
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => "Buatkan narasi atau deskripsi laporan formal kunjungan tamu ke panti asuhan yang profesional dan rapi berdasarkan poin-poin berikut ini:\n" . $request->poin_poin]
+                        ]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $generatedText = $response->json('candidates.0.content.parts.0.text');
+                return response()->json([
+                    'message' => 'Narasi berhasil di-generate.',
+                    'data'    => $generatedText
+                ]);
+            }
+
+            return response()->json(['message' => 'Gagal menghubungi layanan AI.'], 500);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan sistem.', 'error' => $e->getMessage()], 500);
+        }
+    }
 }
