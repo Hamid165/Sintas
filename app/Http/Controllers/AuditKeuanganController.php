@@ -14,9 +14,15 @@ class AuditKeuanganController extends Controller
      * Display the audit keuangan page
      */
     public function index()
-    {
-        return view('admin.audit.keuangan.index');
-    }
+{
+    // Ambil semua transaksi keuangan untuk ditampilkan di dropdown modal
+    $transaksiList = \App\Models\Keuangan::all(); 
+    
+    // Ambil data audit yang sudah ada (untuk tabel)
+    $auditList = \App\Models\AuditKeuangan::latest()->get();
+
+    return view('admin.audit.keuangan.index', compact('transaksiList', 'auditList'));
+}
 
     /**
      * Get audit keuangan list with search and sort

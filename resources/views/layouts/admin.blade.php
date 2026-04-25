@@ -45,35 +45,51 @@
                     <i data-lucide="layout-dashboard" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Dashboard</span>
                 </a>
-
+                
+                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat')
                 <a href="{{ route('admin.anak') }}" 
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.anak*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="users" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Manajemen Anak</span>
                 </a>
+                @endif
 
+                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'bendahara')
                 <a href="{{ route('admin.keuangan') }}" 
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.keuangan*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="wallet" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Keuangan</span>
                 </a>
+                @endif
 
+                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'bendahara' || Auth::user()->role == 'karyawan')
                 <a href="{{ route('admin.inventori') }}" 
-                class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.inventori*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.inventoris*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="package" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Inventaris</span>
                 </a>
+                @endif
 
+                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat')
                 <a href="{{ route('admin.kunjungan') }}" 
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.kunjungan*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="users-round" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Kunjungan Tamu</span>
                 </a>
+                @endif
 
+                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat')
                 <a href="{{ route('admin.audit') }}" 
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.audit*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="shield-check" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Audit</span>
+                </a>
+                @endif
+
+                <a href="{{ route('admin.struktur') }}" 
+                class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.struktur') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                    <i data-lucide="sitemap" size="20"></i>
+                    <span class="font-black text-xs uppercase tracking-widest">Struktur Organisasi</span>
                 </a>
             </nav>
 

@@ -26,6 +26,8 @@
                 <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">Cahaya Asuhan Ruang Empati</p>
             </div>
 
+            <meta name="csrf-token" content="{{ csrf_token() }}">
+
             <form id="loginForm" class="space-y-5">
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email / Username</label>
@@ -33,7 +35,7 @@
                         <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors">
                             <i data-lucide="user" size="18"></i>
                         </div>
-                        <input type="email" id="email" placeholder="Masukkan email admin" required
+                        <input type="email" id="email" placeholder="admin@CareHub.com" required
                             class="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl outline-none font-bold text-sm focus:ring-4 focus:ring-blue-100 transition-all">
                     </div>
                 </div>
@@ -62,24 +64,18 @@
                     <i data-lucide="log-in" size="18"></i>
                 </button>
             </form>
-
-            <!-- <div class="text-center pt-4 border-t border-dashed border-gray-100">
-                <p class="text-[9px] text-gray-300 font-bold uppercase tracking-widest">Prototype v2.5 • Purwokerto Software House</p>
-            </div> -->
         </div>
     </div>
+
     <script>
         lucide.createIcons();
 
-        // Toggle Password Logic
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
 
         togglePassword.addEventListener('click', function() {
             const isPassword = passwordInput.getAttribute('type') === 'password';
             passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-            
-            // Re-render icon dynamically to fix persistence issues
             togglePassword.innerHTML = `<i data-lucide="${isPassword ? 'eye' : 'eye-off'}" size="18"></i>`;
             lucide.createIcons();
         });
@@ -92,18 +88,21 @@
             const btnSubmit = document.getElementById('btnSubmit');
             const errorMessage = document.getElementById('errorMessage');
             const errorText = document.getElementById('errorText');
+            // Ambil token CSRF dari meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Reset state
             errorMessage.classList.add('hidden');
             btnSubmit.innerHTML = 'Memproses...';
             btnSubmit.disabled = true;
 
             try {
+                // Gunakan URL endpoint API yang sudah kamu buat di web.php/api.php
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken // WAJIB ada di Laravel
                     },
                     body: JSON.stringify({ email, password })
                 });
@@ -111,26 +110,28 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Set auth token to localStorage
+                    // Simpan data untuk Mobile App capability
                     localStorage.setItem('auth_token', data.token);
-                    localStorage.setItem('user_name', data.user.name);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
                     
-                    // Supaya web session Laravel tau kita sudah login (jika ada mixed web/api)
-                    // Atau kita bisa mengelola pure SPA state, lalu arahkan manual:
-                    window.location.href = '/admin/dashboard';
+                    // Beri jeda sedikit agar penyimpanan localStorage selesai
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard';
+                    }, 500);
                 } else {
                     errorMessage.classList.remove('hidden');
-                    errorText.innerText = data.message || 'Gagal login, periksa kembali data Anda.';
+                    errorText.innerText = data.message || 'Email atau Password salah!';
                     btnSubmit.innerHTML = '<span>Masuk Ke Dashboard</span><i data-lucide="log-in" size="18"></i>';
+                    btnSubmit.disabled = false;
                     lucide.createIcons();
                 }
             } catch (err) {
                 errorMessage.classList.remove('hidden');
-                errorText.innerText = 'Terjadi kesalahan sistem.';
-            } finally {
+                errorText.innerText = 'Server tidak merespon.';
                 btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<span>Masuk Ke Dashboard</span><i data-lucide="log-in" size="18"></i>';
+                lucide.createIcons();
             }
         });
     </script>
 </body>
-</html>

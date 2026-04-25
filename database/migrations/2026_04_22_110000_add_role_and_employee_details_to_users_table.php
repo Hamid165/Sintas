@@ -12,9 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('karyawan')->after('email')->comment('admin, karyawan');
-            $table->string('jabatan')->nullable()->after('role');
+            $table->string('role')->default('karyawan')->after('email')->comment('admin, sekretariat, bendahara');
+            $table->string('jabatan')->nullable()->after('role'); // Misal: Kepala Panti, Pengasuh
             $table->string('no_hp')->nullable()->after('jabatan');
+            
+            // Tambahkan ini untuk Struktur Organisasi
+            $table->unsignedBigInteger('parent_id')->nullable()->after('no_hp');
+            $table->foreign('parent_id')->references('id')->on('users')->onDelete('set null');
+            
         });
     }
 

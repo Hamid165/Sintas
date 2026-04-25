@@ -1,76 +1,104 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\AuditSekreteriatController;
+use App\Http\Controllers\AuditKeuanganController;
+use App\Http\Controllers\KeuanganController;
+use App\Http\Controllers\Api\KunjunganTamuController;
 
-Route::get('/login', function() { return view('auth.login'); })->name('login');
-
-// Admin panel - List pages
-Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
-
-    // Anak
-    Route::get('/anak', fn() => view('admin.anak.index'))->name('admin.anak');
-    Route::get('/anak/tambah', fn() => view('admin.anak.form'))->name('admin.anak.tambah');
-
-    // Keuangan
-    Route::get('/keuangan', fn() => view('admin.keuangan.index'))->name('admin.keuangan');
-    Route::get('/keuangan/tambah', fn() => view('admin.keuangan.form'))->name('admin.keuangan.tambah');
-
-    // Inventori
-    Route::get('/inventori', fn() => view('admin.inventori.index'))->name('admin.inventori');
-    Route::get('/inventori/tambah', fn() => view('admin.inventori.form'))->name('admin.inventori.tambah');
-
-    // Kunjungan Tamu (menggantikan Artikel/CMS)
-    Route::get('/kunjungan', fn() => view('admin.artikel.index'))->name('admin.kunjungan');
-    Route::get('/kunjungan/tambah', fn() => view('admin.artikel.form'))->name('admin.kunjungan.tambah');
-
-    // Profil
-    Route::get('/profil', fn() => view('admin.profil'))->name('admin.profil');
-
-    // Audit Sekretariat
-    Route::get('/audit', fn() => view('admin.audit.index'))->name('admin.audit');
-    Route::get('/audit/sekretariat', fn() => view('admin.audit.sekretariat.index'))->name('admin.audit.sekretariat');
-    Route::get('/audit/keuangan', fn() => view('admin.audit.keuangan.index'))->name('admin.audit.keuangan');
-});
-
-// API Routes for Audit
-Route::prefix('api')->group(function () {
-    // Surat Masuk
-    Route::get('/surat-masuk', [App\Http\Controllers\AuditSekreteriatController::class, 'getSuratMasuk']);
-    Route::post('/surat-masuk', [App\Http\Controllers\AuditSekreteriatController::class, 'storeSuratMasuk']);
-    Route::put('/surat-masuk/{suratMasuk}', [App\Http\Controllers\AuditSekreteriatController::class, 'updateSuratMasuk']);
-    Route::delete('/surat-masuk/{suratMasuk}', [App\Http\Controllers\AuditSekreteriatController::class, 'destroySuratMasuk']);
-
-    // Surat Keluar
-    Route::get('/surat-keluar', [App\Http\Controllers\AuditSekreteriatController::class, 'getSuratKeluar']);
-    Route::post('/surat-keluar', [App\Http\Controllers\AuditSekreteriatController::class, 'storeSuratKeluar']);
-    Route::put('/surat-keluar/{suratKeluar}', [App\Http\Controllers\AuditSekreteriatController::class, 'updateSuratKeluar']);
-    Route::delete('/surat-keluar/{suratKeluar}', [App\Http\Controllers\AuditSekreteriatController::class, 'destroySuratKeluar']);
-
-    // Audit Keuangan
-    Route::get('/audit-keuangan', [App\Http\Controllers\AuditKeuanganController::class, 'getAuditKeuangan']);
-    Route::post('/audit-keuangan', [App\Http\Controllers\AuditKeuanganController::class, 'store']);
-    Route::put('/audit-keuangan/{auditKeuangan}', [App\Http\Controllers\AuditKeuanganController::class, 'update']);
-    Route::delete('/audit-keuangan/{auditKeuangan}', [App\Http\Controllers\AuditKeuanganController::class, 'destroy']);
-
-    // Keuangan (for dropdown)
-    Route::get('/keuangan', [App\Http\Controllers\KeuanganController::class, 'getAll']);
-
-    // Export Routes
-    Route::get('/export/surat-masuk-csv', [App\Http\Controllers\ExportController::class, 'suratMasukCsv']);
-    Route::get('/export/surat-masuk-excel', [App\Http\Controllers\ExportController::class, 'suratMasukExcel']);
-    Route::get('/export/surat-keluar-csv', [App\Http\Controllers\ExportController::class, 'suratKeluarCsv']);
-    Route::get('/export/surat-keluar-excel', [App\Http\Controllers\ExportController::class, 'suratKeluarExcel']);
-    Route::get('/export/audit-keuangan-csv', [App\Http\Controllers\ExportController::class, 'auditKeuanganCsv']);
-    Route::get('/export/audit-keuangan-excel', [App\Http\Controllers\ExportController::class, 'auditKeuanganExcel']);
-
-    // Kunjungan Tamu API
-    Route::get('/kunjungan-tamu', [App\Http\Controllers\Api\KunjunganTamuController::class, 'index']);
-    Route::post('/kunjungan-tamu', [App\Http\Controllers\Api\KunjunganTamuController::class, 'store']);
-    Route::get('/kunjungan-tamu/surat-options', [App\Http\Controllers\Api\KunjunganTamuController::class, 'getSuratOptions']);
-    Route::get('/kunjungan-tamu/{id}', [App\Http\Controllers\Api\KunjunganTamuController::class, 'show']);
-    Route::post('/kunjungan-tamu/{id}', [App\Http\Controllers\Api\KunjunganTamuController::class, 'update']);
-    Route::delete('/kunjungan-tamu/{id}', [App\Http\Controllers\Api\KunjunganTamuController::class, 'destroy']);
-});
+// Auth Routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/api/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Redirect root to dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
+
+// Admin panel - List pages
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    
+    // Global Access
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/profil', fn() => view('admin.profil'))->name('admin.profil');
+    Route::get('/struktur-organisasi', [DashboardController::class, 'strukturOrganisasi'])->name('admin.struktur');
+
+    // CRUD Struktur (Admin Only)
+    Route::get('/struktur/tambah', [DashboardController::class, 'tambahStaf'])->name('admin.struktur.tambah');
+    Route::post('/struktur/simpan', [DashboardController::class, 'simpanStaf'])->name('admin.struktur.simpan');
+    Route::get('/struktur/edit/{id}', [DashboardController::class, 'editStaf'])->name('admin.struktur.edit');
+    Route::post('/struktur/update/{id}', [DashboardController::class, 'updateStaf'])->name('admin.struktur.update');
+    Route::delete('/struktur/hapus/{id}', [DashboardController::class, 'hapusStaf'])->name('admin.struktur.hapus');
+
+    // Admin & Sekretariat
+    Route::middleware(['role:admin,sekretariat'])->group(function () {
+        Route::get('/anak', fn() => view('admin.anak.index'))->name('admin.anak');
+        Route::get('/anak/tambah', fn() => view('admin.anak.form'))->name('admin.anak.tambah');
+        Route::get('/kunjungan', fn() => view('admin.kunjungan.index'))->name('admin.kunjungan');
+        Route::get('/kunjungan/tambah', fn() => view('admin.kunjungan.form'))->name('admin.kunjungan.tambah');
+    });
+
+    // Admin & Bendahara
+    Route::middleware(['role:admin,bendahara'])->group(function () {
+        Route::get('/keuangan', fn() => view('admin.keuangan.index'))->name('admin.keuangan');
+        Route::get('/keuangan/tambah', fn() => view('admin.keuangan.form'))->name('admin.keuangan.tambah');
+    });
+
+    // Inventaris
+    Route::middleware(['role:admin,karyawan,bendahara'])->group(function () {
+        Route::get('/inventori', fn() => view('admin.inventori.index'))->name('admin.inventori');
+        Route::get('/inventori/tambah', fn() => view('admin.inventori.form'))->name('admin.inventori.tambah');
+    });
+
+    // Audit Menu
+    Route::middleware(['role:admin,sekretariat'])->group(function () {
+        Route::get('/audit', fn() => view('admin.audit.index'))->name('admin.audit');
+        Route::get('/audit/keuangan', [AuditKeuanganController::class, 'index'])->name('admin.audit.keuangan');
+        Route::get('/audit/sekretariat', fn() => view('admin.audit.sekretariat.index'))->name('admin.audit.sekretariat');
+    });
+});
+
+// API Routes
+Route::prefix('api')->middleware(['auth'])->group(function () {
+    
+    // Surat
+    Route::get('/surat-masuk', [AuditSekreteriatController::class, 'getSuratMasuk']);
+    Route::post('/surat-masuk', [AuditSekreteriatController::class, 'storeSuratMasuk']);
+    Route::put('/surat-masuk/{suratMasuk}', [AuditSekreteriatController::class, 'updateSuratMasuk']);
+    Route::delete('/surat-masuk/{suratMasuk}', [AuditSekreteriatController::class, 'destroySuratMasuk']);
+
+    Route::get('/surat-keluar', [AuditSekreteriatController::class, 'getSuratKeluar']);
+    Route::post('/surat-keluar', [AuditSekreteriatController::class, 'storeSuratKeluar']);
+    Route::put('/surat-keluar/{suratKeluar}', [AuditSekreteriatController::class, 'updateSuratKeluar']);
+    Route::delete('/surat-keluar/{suratKeluar}', [AuditSekreteriatController::class, 'destroySuratKeluar']);
+
+    // Audit Keuangan
+    Route::get('/audit-keuangan', [AuditKeuanganController::class, 'getAuditKeuangan']);
+    Route::post('/audit-keuangan', [AuditKeuanganController::class, 'store']);
+    Route::put('/audit-keuangan/{auditKeuangan}', [AuditKeuanganController::class, 'update']);
+    Route::delete('/audit-keuangan/{auditKeuangan}', [AuditKeuanganController::class, 'destroy']);
+
+    Route::get('/keuangan-list', [KeuanganController::class, 'getAll']);
+
+    // Export
+    Route::controller(ExportController::class)->group(function () {
+        Route::get('/export/surat-masuk-csv', 'suratMasukCsv');
+        Route::get('/export/surat-masuk-excel', 'suratMasukExcel');
+        Route::get('/export/surat-keluar-csv', 'suratKeluarCsv');
+        Route::get('/export/surat-keluar-excel', 'suratKeluarExcel');
+        Route::get('/export/audit-keuangan-csv', 'auditKeuanganCsv');
+        Route::get('/export/audit-keuangan-excel', 'auditKeuanganExcel');
+    });
+
+    // Kunjungan
+    Route::controller(KunjunganTamuController::class)->group(function () {
+        Route::get('/kunjungan-tamu', 'index');
+        Route::post('/kunjungan-tamu', 'store');
+        Route::get('/kunjungan-tamu/surat-options', 'getSuratOptions');
+        Route::get('/kunjungan-tamu/{id}', 'show');
+        Route::post('/kunjungan-tamu/{id}', 'update');
+        Route::delete('/kunjungan-tamu/{id}', 'destroy');
+    });
+});

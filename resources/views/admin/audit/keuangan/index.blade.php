@@ -124,6 +124,11 @@
                 <label class="block text-xs font-black text-gray-700 mb-2 uppercase">Pilih Transaksi Keuangan</label>
                 <select name="keuangan_id" id="keuanganSelect" required class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
                     <option value="">- Pilih Transaksi -</option>
+                    @foreach($transaksiList as $t)
+                        <option value="{{ $t->id }}">
+                            {{ $t->created_at->format('d/m/Y') }} - {{ $t->jenis_transaksi }} (Rp {{ number_format($t->jumlah_nominal) }})
+                        </option>
+                    @endforeach
                 </select>
             </div>
 

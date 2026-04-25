@@ -28,6 +28,7 @@ class User extends Authenticatable
         'role',
         'jabatan',
         'no_hp',
+        'parent_id',
     ];
 
     /**
@@ -52,4 +53,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    // Untuk mendapatkan bawahan dari user ini
+    public function bawahan()
+    {
+        return $this->hasMany(User::class, 'parent_id', 'id');
+    }
+
+    // Untuk mendapatkan atasan dari user ini
+    public function atasan()
+    {
+        return $this->belongsTo(User::class, 'parent_id', 'id');
+    }
+
 }
