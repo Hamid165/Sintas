@@ -116,20 +116,21 @@
     // ── Toggle Password ─────────────────────────────────────────────────────
     function togglePassword(btn) {
         const span = btn.previousElementSibling;
-        const icon = btn.querySelector('i');
         const isVisible = span.getAttribute('data-visible') === '1';
 
         if (isVisible) {
-            // Sembunyikan → mata tertutup (dicoret)
+            // Sembunyikan → kembalikan ke titik-titik dan icon mata tercoret
             span.textContent = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
             span.setAttribute('data-visible', '0');
-            icon.setAttribute('data-lucide', 'eye-off');
+            btn.innerHTML = '<i data-lucide="eye-off" size="14"></i>';
         } else {
-            // Tampilkan → mata terbuka
+            // Tampilkan → lihat password dan icon mata terbuka
             span.textContent = span.getAttribute('data-password');
             span.setAttribute('data-visible', '1');
-            icon.setAttribute('data-lucide', 'eye');
+            btn.innerHTML = '<i data-lucide="eye" size="14"></i>';
         }
+        
+        // Render ulang icon baru yang baru saja disisipkan
         lucide.createIcons();
     }
 
