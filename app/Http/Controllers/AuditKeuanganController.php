@@ -14,15 +14,22 @@ class AuditKeuanganController extends Controller
      * Display the audit keuangan page
      */
     public function index()
-{
-    // Ambil semua transaksi keuangan untuk ditampilkan di dropdown modal
-    $transaksiList = \App\Models\Keuangan::all(); 
-    
-    // Ambil data audit yang sudah ada (untuk tabel)
-    $auditList = \App\Models\AuditKeuangan::latest()->get();
+    {
+        $transaksiList = \App\Models\Keuangan::all();
+        $auditList = \App\Models\AuditKeuangan::latest()->get();
+        return view('admin.audit.keuangan.index', compact('transaksiList', 'auditList'));
+    }
 
-    return view('admin.audit.keuangan.index', compact('transaksiList', 'auditList'));
-}
+    /**
+     * Show the form for creating a new audit keuangan
+     */
+    public function create()
+    {
+        $transaksiList = \App\Models\Keuangan::orderBy('created_at', 'desc')->get();
+        $suratMasukList = \App\Models\SuratMasuk::orderBy('kode_surat')->pluck('kode_surat');
+        $suratKeluarList = \App\Models\SuratKeluar::orderBy('kode_surat')->pluck('kode_surat');
+        return view('admin.audit.keuangan.tambah', compact('transaksiList', 'suratMasukList', 'suratKeluarList'));
+    }
 
     /**
      * Get audit keuangan list with search and sort
@@ -82,20 +89,13 @@ class AuditKeuanganController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        // Check if kode_dokumen is a valid letter code
+        // Cek kode_dokumen ada di surat masuk atau surat keluar
         $kode = $validated['kode_dokumen'];
-        $isValidCode = false;
-
-        if (strpos($kode, 'SRT-IN-') === 0) {
-            $isValidCode = SuratMasuk::where('kode_surat', $kode)->exists();
-            $validated['kode_surat'] = $kode;
-        } elseif (strpos($kode, 'SRT-OUT-') === 0) {
-            $isValidCode = SuratKeluar::where('kode_surat', $kode)->exists();
-            $validated['kode_surat'] = $kode;
-        }
+        $isValidCode = SuratMasuk::where('kode_surat', $kode)->exists()
+                    || SuratKeluar::where('kode_surat', $kode)->exists();
 
         if (!$isValidCode) {
-            return response()->json(['message' => 'Kode dokumen tidak ditemukan'], 422);
+            return response()->json(['message' => 'Kode dokumen tidak ditemukan. Pastikan sudah diinput di Rekap Sekretariat terlebih dahulu.'], 422);
         }
 
         $audit = AuditKeuangan::create($validated);

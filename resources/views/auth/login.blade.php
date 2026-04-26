@@ -59,6 +59,10 @@
                     <p id="errorText" class="text-[10px] font-black uppercase tracking-widest"></p>
                 </div>
 
+                <div class="flex justify-end">
+                    <a href="{{ route('lupa-password') }}" class="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-700 transition-colors">Lupa Password?</a>
+                </div>
+
                 <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-4">
                     <span>Masuk Ke Dashboard</span>
                     <i data-lucide="log-in" size="18"></i>

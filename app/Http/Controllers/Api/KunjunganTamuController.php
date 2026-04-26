@@ -149,11 +149,11 @@ class KunjunganTamuController extends Controller
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
+            $response = \Illuminate\Support\Facades\Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => "Buatkan narasi atau deskripsi laporan formal kunjungan tamu ke panti asuhan yang profesional dan rapi berdasarkan poin-poin berikut ini:\n" . $request->poin_poin]
+                            ['text' => "Buatkan 1 laporan formal kegiatan kunjungan tamu ke panti asuhan yang rapi berdasarkan data berikut:\n" . $request->poin_poin . "\n\nSYARAT MUTLAK: Tuliskan HANYA 3 paragraf cerita langsung. JANGAN berikan opsi. JANGAN gunakan format markdown apapun (JANGAN pakai tanda bintang * atau pagar #). Langsung mulai dari paragraf pertama."]
                         ]
                     ]
                 ]
@@ -161,13 +161,21 @@ class KunjunganTamuController extends Controller
 
             if ($response->successful()) {
                 $generatedText = $response->json('candidates.0.content.parts.0.text');
+                
+                // Membersihkan sisa markdown jika AI masih bandel
+                $generatedText = preg_replace('/[\*#`]/', '', $generatedText);
+                $generatedText = trim($generatedText);
+
                 return response()->json([
                     'message' => 'Narasi berhasil di-generate.',
                     'data'    => $generatedText
                 ]);
             }
 
-            return response()->json(['message' => 'Gagal menghubungi layanan AI.'], 500);
+            return response()->json([
+                'message' => 'Gagal menghubungi layanan AI.',
+                'api_error' => $response->body()
+            ], 500);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Terjadi kesalahan sistem.', 'error' => $e->getMessage()], 500);
         }

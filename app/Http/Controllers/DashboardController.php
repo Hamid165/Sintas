@@ -28,45 +28,51 @@ class DashboardController extends Controller
         ));
     }
 
-    // NAMA METHOD INI HARUS SAMA DENGAN DI web.php
     public function strukturOrganisasi()
     {
-        // Ambil atasan tertinggi (yang tidak punya parent)
-$kepala = User::with('bawahan')->whereNull('parent_id')->first();
-
-    return view('admin.sdm.struktur', compact('kepala'));
+        $users = User::orderByRaw("CASE WHEN role = 'admin' THEN 1 ELSE 2 END")
+                     ->orderBy('id', 'desc')
+                     ->get();
+        return view('admin.sdm.struktur', compact('users'));
     }
     // Simpan Staf Baru
     public function simpanStaf(Request $request) {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required',
-            'jabatan' => 'required',
-            'parent_id' => 'nullable|exists:users,id'
-        ]);
+        try {
+            $request->validate([
+                'name'      => 'required',
+                'email'     => 'required|email|unique:users',
+                'password'  => 'required|min:6',
+                'role'      => 'required',
+                'jabatan'   => 'required',
+            ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'jabatan' => $request->jabatan,
-            'parent_id' => $request->parent_id,
-            'no_hp' => $request->no_hp,
-        ]);
+            $user = User::create([
+                'name'           => $request->name,
+                'email'          => $request->email,
+                'password'       => Hash::make($request->password),
+                'plain_password' => $request->password,
+                'role'           => $request->role, // keep old string for fallback
+                'jabatan'        => $request->jabatan,
+            ]);
 
-        return redirect()->route('admin.struktur')->with('success', 'Anggota organisasi berhasil ditambahkan!');
+            // Assign Spatie RBAC Role
+            $user->assignRole($request->role);
+
+            return redirect()->to(route('admin.struktur') . '?toast=' . urlencode('Anggota berhasil ditambahkan!'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = implode(' ', array_merge(...array_values($e->errors())));
+            return redirect()->to(route('admin.struktur') . '?toast=' . urlencode('Validasi gagal: ' . $errors) . '&toast_type=error');
+        } catch (\Exception $e) {
+            return redirect()->to(route('admin.struktur') . '?toast=' . urlencode('Terjadi kesalahan: ' . $e->getMessage()) . '&toast_type=error');
+        }
     }
 
-    // Hapus Staf
     public function hapusStaf($id) {
         $user = User::findOrFail($id);
-        // Set bawahan menjadi tidak punya atasan dulu agar tidak error (optional)
+        $namaUser = $user->name;
         User::where('parent_id', $id)->update(['parent_id' => null]);
         $user->delete();
 
-        return redirect()->route('admin.struktur')->with('success', 'Anggota berhasil dihapus.');
+        return redirect()->to(route('admin.struktur') . '?toast=' . urlencode($namaUser . ' berhasil dihapus dari struktur.'));
     }
 }

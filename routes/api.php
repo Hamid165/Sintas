@@ -82,4 +82,48 @@ Route::middleware('auth:sanctum')->group(function () {
         $user->update(['password' => \Hash::make($request->password)]);
         return response()->json(['message' => 'Password berhasil diubah.']);
     });
+
+    // ── Dipindahkan dari web.php ─────────────────────────────────────────
+
+    // Surat
+    Route::get('/surat-masuk', [\App\Http\Controllers\AuditSekreteriatController::class, 'getSuratMasuk']);
+    Route::get('/surat-masuk/{suratMasuk}', [\App\Http\Controllers\AuditSekreteriatController::class, 'showSuratMasuk']);
+    Route::post('/surat-masuk', [\App\Http\Controllers\AuditSekreteriatController::class, 'storeSuratMasuk']);
+    Route::put('/surat-masuk/{suratMasuk}', [\App\Http\Controllers\AuditSekreteriatController::class, 'updateSuratMasuk']);
+    Route::delete('/surat-masuk/{suratMasuk}', [\App\Http\Controllers\AuditSekreteriatController::class, 'destroySuratMasuk']);
+
+    Route::get('/surat-keluar', [\App\Http\Controllers\AuditSekreteriatController::class, 'getSuratKeluar']);
+    Route::get('/surat-keluar/{suratKeluar}', [\App\Http\Controllers\AuditSekreteriatController::class, 'showSuratKeluar']);
+    Route::post('/surat-keluar', [\App\Http\Controllers\AuditSekreteriatController::class, 'storeSuratKeluar']);
+    Route::put('/surat-keluar/{suratKeluar}', [\App\Http\Controllers\AuditSekreteriatController::class, 'updateSuratKeluar']);
+    Route::delete('/surat-keluar/{suratKeluar}', [\App\Http\Controllers\AuditSekreteriatController::class, 'destroySuratKeluar']);
+
+    // Audit Keuangan
+    Route::get('/audit-keuangan', [\App\Http\Controllers\AuditKeuanganController::class, 'getAuditKeuangan']);
+    Route::post('/audit-keuangan', [\App\Http\Controllers\AuditKeuanganController::class, 'store']);
+    Route::put('/audit-keuangan/{auditKeuangan}', [\App\Http\Controllers\AuditKeuanganController::class, 'update']);
+    Route::delete('/audit-keuangan/{auditKeuangan}', [\App\Http\Controllers\AuditKeuanganController::class, 'destroy']);
+
+    Route::get('/keuangan-list', [\App\Http\Controllers\Api\KeuanganController::class, 'getAll']);
+
+    // Export
+    Route::controller(\App\Http\Controllers\ExportController::class)->group(function () {
+        Route::get('/export/surat-masuk-csv', 'suratMasukCsv');
+        Route::get('/export/surat-masuk-excel', 'suratMasukExcel');
+        Route::get('/export/surat-keluar-csv', 'suratKeluarCsv');
+        Route::get('/export/surat-keluar-excel', 'suratKeluarExcel');
+        Route::get('/export/audit-keuangan-csv', 'auditKeuanganCsv');
+        Route::get('/export/audit-keuangan-excel', 'auditKeuanganExcel');
+    });
+
+    // Kunjungan
+    Route::controller(\App\Http\Controllers\Api\KunjunganTamuController::class)->group(function () {
+        Route::get('/kunjungan-tamu', 'index');
+        Route::post('/kunjungan-tamu', 'store');
+        Route::post('/kunjungan-tamu/generate-ai', 'generateAiDescription');
+        Route::get('/kunjungan-tamu/surat-options', 'getSuratOptions');
+        Route::get('/kunjungan-tamu/{id}', 'show');
+        Route::post('/kunjungan-tamu/{id}', 'update');
+        Route::delete('/kunjungan-tamu/{id}', 'destroy');
+    });
 });

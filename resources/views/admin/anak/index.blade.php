@@ -32,10 +32,10 @@
             <table class="w-full text-left whitespace-nowrap">
                 <thead class="bg-gray-50 text-slate-800 text-[10px] uppercase font-black border-b border-[#D1D5DC]">
                     <tr>
-                        <th class="px-6 py-5 w-8">#</th>
+                        <th class="px-6 py-5 w-8">No</th>
                         <th class="px-6 py-5">
                             <button onclick="toggleSort()" class="flex items-center gap-1.5 group hover:text-blue-600 transition-colors" title="Urutkan berdasarkan Nama">
-                                Nama Lengkap
+                                NAMA LENGKAP
                                 <span id="sortIcon" class="flex flex-col gap-[2px] opacity-40 group-hover:opacity-100 transition-opacity">
                                     <i data-lucide="chevrons-up-down" size="12"></i>
                                 </span>

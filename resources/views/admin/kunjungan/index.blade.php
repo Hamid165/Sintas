@@ -25,22 +25,48 @@
         </div>
     </div>
 
-    {{-- Grid Artikel --}}
-    <div id="artikelGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div class="col-span-full py-24 text-center text-gray-400">
-            <i data-lucide="loader" class="mx-auto mb-3 animate-spin text-blue-400" size="28"></i>
-            <p class="text-xs font-bold uppercase tracking-widest mt-2">Memuat data...</p>
+    {{-- Grid Kunjungan Tamu --}}
+    <div class="bg-white rounded-[2rem] shadow-sm w-full p-6 md:p-8">
+        <div id="artikelGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div class="col-span-full py-24 text-center text-gray-400">
+                <i data-lucide="loader" class="mx-auto mb-3 animate-spin text-blue-400" size="28"></i>
+                <p class="text-xs font-bold uppercase tracking-widest mt-2">Memuat data...</p>
+            </div>
+        </div>
+
+        {{-- Pagination Footer --}}
+        <div id="paginationBar" class="hidden px-8 py-5 border-t border-[#D1D5DC] bg-gray-50/50 flex items-center justify-between mt-8 rounded-b-[2rem]">
+            <p id="paginationInfo" class="text-[11px] text-gray-400 font-bold uppercase tracking-widest"></p>
+            <div id="paginationBtns" class="flex items-center gap-2"></div>
         </div>
     </div>
+</div>
 
-    {{-- Pagination Footer --}}
-    <div id="paginationBar" class="hidden bg-white rounded-[2rem] border-0 shadow-sm px-8 py-5 flex items-center justify-between">
-        <p id="paginationInfo" class="text-[11px] text-gray-400 font-bold uppercase tracking-widest"></p>
-        <div id="paginationBtns" class="flex items-center gap-2"></div>
+{{-- Modal Detail Kunjungan --}}
+<div id="modalDetailKunjungan" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col transform scale-95 transition-transform duration-300 relative" id="modalDetailContent">
+        <button onclick="tutupDetailKunjungan()" class="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 text-white rounded-xl flex items-center justify-center hover:bg-black/70 backdrop-blur-md transition-all">
+            <i data-lucide="x" size="20"></i>
+        </button>
+        <div id="detailGambar" class="w-full h-64 bg-gray-100 relative shrink-0"></div>
+        <div class="p-6 md:p-8 overflow-y-auto flex-1">
+            <div class="flex items-center gap-2 mb-4" id="detailBadges"></div>
+            <h2 class="text-2xl md:text-3xl font-black text-slate-800 mb-2" id="detailJudul"></h2>
+            <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest mb-6" id="detailTanggal"></p>
+            <div class="bg-slate-50 p-6 rounded-[1.5rem] border border-gray-100">
+                <h4 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Isi Laporan / Keterangan:</h4>
+                <div class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap" id="detailDeskripsi"></div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+    // Pindahkan modal ke luar dari .animate-page agar tidak terjebak transform CSS
+    document.addEventListener("DOMContentLoaded", () => {
+        document.body.appendChild(document.getElementById('modalDetailKunjungan'));
+    });
+
     const token = localStorage.getItem('auth_token');
     if(!token) { window.location.href = '/login'; }
 
@@ -50,7 +76,7 @@
         'Accept': 'application/json'
     });
 
-    const PER_PAGE = 8; // 8 cards per halaman untuk grid 4 kolom
+    const PER_PAGE = 9; // 9 cards per halaman untuk grid 3 kolom
     let allData = [];
     let filteredData = [];
 
@@ -71,7 +97,7 @@
 
     async function loadArtikel() {
         try {
-            const res = await fetch('/api/artikel', { headers: getAuthHeaders() });
+            const res = await fetch('/api/kunjungan-tamu', { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
             if(res.status === 401) { localStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
             allData = await res.json();
             filteredData = [...allData];
@@ -86,38 +112,52 @@
         const grid = document.getElementById('artikelGrid');
 
         if (filteredData.length === 0) {
-            grid.innerHTML = `<div class="col-span-full bg-white p-24 rounded-[2.5rem] border-0 border-dashed text-center">
+            grid.innerHTML = `<div class="col-span-full py-24 text-center text-gray-400">
                 <i data-lucide="users" class="mx-auto text-gray-200 mb-4" size="56"></i>
                 <p class="text-gray-400 font-bold uppercase text-xs tracking-widest mb-5">Belum ada kunjungan tamu.</p>
-                <a href="/admin/kunjungan/tambah" class="bg-blue-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase hover:bg-blue-700 transition-all">+ Tambah Kunjungan Tamu</a>
+                <a href="/admin/kunjungan/tambah" class="inline-block mt-4 bg-blue-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase hover:bg-blue-700 transition-all">+ Tambah Kunjungan Tamu</a>
             </div>`;
             lucide.createIcons(); return;
         }
 
-        grid.innerHTML = pageData.map(a => {
+        grid.innerHTML = pageData.map((a, index) => {
             const tanggal = new Date(a.tanggal_pelaksanaan || a.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
-            const preview = (a.deskripsi_laporan || '').replace(/<[^>]*>?/gm, '').substring(0, 120);
-            const hasGambar = a.foto_kegiatan && a.foto_kegiatan.trim() !== '';
+            const hasGambar = a.foto_url && a.foto_url.trim() !== '';
+            const imgHTML = hasGambar 
+                ? `<img src="${a.foto_url}" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-500">`
+                : `<div class="w-full h-48 bg-gray-100 flex flex-col items-center justify-center text-gray-400"><i data-lucide="image" size="48" class="opacity-20 mb-2"></i><span class="text-xs font-bold uppercase tracking-widest opacity-50">Tanpa Foto</span></div>`;
+            
+            const desc = (a.deskripsi_laporan || '').replace(/<[^>]*>?/gm, '');
+            const shortDesc = desc.length > 150 ? desc.substring(0, 150) + '...' : desc;
+
             return `
-            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col group">
-                <div class="h-44 ${hasGambar ? '' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'} flex items-center justify-center relative shrink-0 overflow-hidden">
-                    ${hasGambar
-                        ? `<img src="/storage/${a.foto_kegiatan}" alt="${a.judul_kegiatan}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
-                        : `<i data-lucide="users" class="text-blue-100 group-hover:scale-110 transition-transform" size="52"></i>`
-                    }
-                    <div class="absolute bottom-3 left-4">
-                        <span class="bg-white/80 backdrop-blur-sm text-blue-700 text-[9px] font-black px-2.5 py-1 rounded-lg border-0 border-blue-100 uppercase">${tanggal}</span>
+            <div class="flex flex-col bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all overflow-hidden group">
+                <div onclick="bukaDetailKunjungan(${a.id})" class="cursor-pointer flex flex-col flex-1">
+                    <div class="relative w-full h-48 overflow-hidden shrink-0">
+                        ${imgHTML}
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm">
+                            ${tanggal}
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="user" size="12"></i> ${a.nama_tamu}</span>
+                        </div>
+                        
+                        <h4 class="text-lg font-black text-slate-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">${a.judul_kegiatan}</h4>
+                        
+                        <p class="text-sm text-gray-500 leading-relaxed flex-1 line-clamp-3">${shortDesc || '<i class="opacity-50">Tidak ada deskripsi laporan.</i>'}</p>
                     </div>
                 </div>
-                <div class="p-6 flex flex-col flex-1">
-                    <h3 class="font-black text-gray-800 leading-tight text-base mb-2 line-clamp-2">${a.judul_kegiatan}</h3>
-                    <p class="text-gray-400 text-xs leading-relaxed line-clamp-3 flex-1">Tamu: ${a.nama_tamu}<br>${preview}${preview.length >= 120 ? '...' : ''}</p>
-                    <div class="mt-5 pt-4 border-t border-gray-50 flex justify-between items-center">
-                        <a href="/admin/kunjungan/tambah?id=${a.id}" class="flex items-center gap-1.5 text-blue-500 font-black text-[10px] uppercase hover:text-blue-700 transition-colors">
-                            <i data-lucide="edit-3" size="12"></i> Edit
+                
+                <div class="p-6 pt-0 shrink-0">
+                    <div class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+                        <a href="/admin/kunjungan/tambah?id=${a.id}" class="py-3 rounded-xl bg-blue-50 text-blue-600 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white transition-all">
+                            Edit Data
                         </a>
-                        <button onclick="hapusArtikel(${a.id})" class="flex items-center gap-1.5 text-rose-400 font-black text-[10px] uppercase hover:text-rose-600 transition-colors">
-                            <i data-lucide="trash-2" size="12"></i> Hapus
+                        <button onclick="hapusArtikel(${a.id})" class="py-3 rounded-xl bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-rose-600 hover:text-white transition-all">
+                            Hapus Data
                         </button>
                     </div>
                 </div>
@@ -168,7 +208,7 @@
         const ok = await showConfirm('Hapus kunjungan tamu ini secara permanen?');
         if (!ok) return;
         try {
-            await fetch(`/api/artikel/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            await fetch(`/api/kunjungan-tamu/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'X-Requested-With': 'XMLHttpRequest' } });
             showToast('Kunjungan tamu berhasil dihapus.', 'success');
             loadArtikel();
         } catch(e) { showToast('Gagal menghapus kunjungan tamu.', 'error'); }
@@ -185,8 +225,7 @@
                 'Judul Kegiatan': a.judul_kegiatan || '-',
                 'Nama Tamu': a.nama_tamu || '-',
                 'Tanggal Pelaksanaan': tgl,
-                'Deskripsi Laporan': textContent,
-                'Nomor Surat Ref': a.nomor_surat_ref || '-'
+                'Deskripsi Laporan': textContent
             };
         });
 
@@ -195,6 +234,58 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, "Data Kunjungan Tamu");
         
         XLSX.writeFile(workbook, "data-kunjungan-tamu-carehub.xlsx");
+    }
+
+    // Modal Detail Logic
+    function bukaDetailKunjungan(id) {
+        const item = allData.find(d => d.id === id);
+        if (!item) return;
+
+        const tanggal = new Date(item.tanggal_pelaksanaan || item.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+
+        document.getElementById('detailJudul').textContent = item.judul_kegiatan;
+        document.getElementById('detailTanggal').textContent = `Tanggal Kunjungan: ${tanggal}`;
+        document.getElementById('detailDeskripsi').innerHTML = item.deskripsi_laporan || '<i>Tidak ada deskripsi.</i>';
+
+        document.getElementById('detailBadges').innerHTML = `
+            <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="user" size="14"></i> ${item.nama_tamu}</span>
+        `;
+
+        if (item.foto_url && item.foto_url.trim() !== '') {
+            document.getElementById('detailGambar').innerHTML = `<img src="${item.foto_url}" class="w-full h-full object-cover">`;
+        } else {
+            document.getElementById('detailGambar').innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-gray-400"><i data-lucide="image" size="48" class="opacity-20 mb-2"></i><span class="text-xs font-bold uppercase tracking-widest opacity-50">Tanpa Foto</span></div>`;
+        }
+
+        const modal = document.getElementById('modalDetailKunjungan');
+        const content = document.getElementById('modalDetailContent');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Trigger animation
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('opacity-100');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        });
+
+        lucide.createIcons();
+    }
+
+    function tutupDetailKunjungan() {
+        const modal = document.getElementById('modalDetailKunjungan');
+        const content = document.getElementById('modalDetailContent');
+        
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
     }
 </script>
 @endsection

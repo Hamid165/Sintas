@@ -44,6 +44,14 @@ class AuditSekreteriatController extends Controller
     }
 
     /**
+     * Get single surat masuk
+     */
+    public function showSuratMasuk(SuratMasuk $suratMasuk)
+    {
+        return response()->json($suratMasuk);
+    }
+
+    /**
      * Get surat keluar list with search and sort
      */
     public function getSuratKeluar(Request $request)
@@ -65,6 +73,14 @@ class AuditSekreteriatController extends Controller
         $perPage = min((int) $request->get('per_page', 10), 9999);
         $data = $query->paginate($perPage);
         return response()->json($data);
+    }
+
+    /**
+     * Get single surat keluar
+     */
+    public function showSuratKeluar(SuratKeluar $suratKeluar)
+    {
+        return response()->json($suratKeluar);
     }
 
     /**

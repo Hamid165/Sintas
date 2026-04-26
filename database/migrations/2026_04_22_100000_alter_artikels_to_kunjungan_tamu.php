@@ -9,18 +9,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('artikels', function (Blueprint $table) {
-            // Drop old columns
-            $table->dropColumn(['judul', 'deskripsi_konten', 'gambar_konten']);
+            // Drop old columns conditionally
+            if (Schema::hasColumn('artikels', 'judul')) {
+                $table->dropColumn(['judul', 'deskripsi_konten', 'gambar_konten']);
+            }
         });
 
         Schema::table('artikels', function (Blueprint $table) {
-            // Add new columns for kunjungan tamu
-            $table->string('judul_kegiatan');
-            $table->string('nama_tamu');
-            $table->date('tanggal_pelaksanaan');
-            $table->string('foto_kegiatan')->nullable();
-            $table->text('deskripsi_laporan');
-            $table->string('nomor_surat_ref')->nullable(); // reference to surat kode
+            // Add new columns for kunjungan tamu conditionally
+            if (!Schema::hasColumn('artikels', 'judul_kegiatan')) {
+                $table->string('judul_kegiatan')->nullable();
+            }
+            if (!Schema::hasColumn('artikels', 'nama_tamu')) {
+                $table->string('nama_tamu')->nullable();
+            }
+            if (!Schema::hasColumn('artikels', 'tanggal_pelaksanaan')) {
+                $table->date('tanggal_pelaksanaan')->nullable();
+            }
+            if (!Schema::hasColumn('artikels', 'foto_kegiatan')) {
+                $table->string('foto_kegiatan')->nullable();
+            }
+            if (!Schema::hasColumn('artikels', 'deskripsi_laporan')) {
+                $table->text('deskripsi_laporan')->nullable();
+            }
+            if (!Schema::hasColumn('artikels', 'nomor_surat_ref')) {
+                $table->string('nomor_surat_ref')->nullable(); // reference to surat kode
+            }
         });
     }
 

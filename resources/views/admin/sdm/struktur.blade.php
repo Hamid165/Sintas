@@ -1,188 +1,169 @@
 @extends('layouts.admin')
+@section('title', 'Manajemen SDM - CareHub')
 
 @section('content')
-<div class="p-6">
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Struktur Organisasi</h1>
-            <p class="text-sm text-slate-500 font-medium">Hierarki kepengurusan dan manajemen SDM CareHub</p>
+<div class="space-y-6 w-full">
+
+    {{-- Header Section --}}
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm gap-4">
+        <div class="w-full lg:w-auto">
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Manajemen SDM</h3>
+            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Daftar Akun Pengurus & Karyawan</p>
         </div>
-        
+
         @if(Auth::user()->role == 'admin')
-        <button onclick="openModalTambah()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-100 transition-all flex items-center gap-2">
-            <i data-lucide="plus-circle" size="18"></i>
-            Tambah Anggota
-        </button>
+        <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <a href="{{ route('admin.struktur.tambah') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 w-full sm:w-auto border-2 border-transparent">
+                <i data-lucide="plus" size="18"></i>
+                <span>Tambah Anggota</span>
+            </a>
+        </div>
         @endif
     </div>
 
-    {{-- Container Bagan --}}
-    <div class="bg-white p-12 rounded-[3rem] shadow-sm flex justify-center overflow-x-auto min-h-[600px] border border-slate-100">
-        @if($kepala)
-            <div class="flex flex-col items-center">
-                {{-- 1. LEVEL ATAS (ROOT) --}}
-                <div class="relative group">
-                    <div class="bg-slate-900 text-white p-6 rounded-[2rem] w-60 text-center shadow-2xl border-4 border-white">
-                        <p class="text-[10px] uppercase font-black tracking-[0.2em] text-blue-400 mb-1">{{ $kepala->jabatan }}</p>
-                        <h3 class="font-black text-lg leading-tight">{{ $kepala->name }}</h3>
-                    </div>
-                    
-                    @if(Auth::user()->role == 'admin')
-                    <div class="absolute -top-3 -right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                        <form action="{{ route('admin.struktur.hapus', $kepala->id) }}" method="POST" onsubmit="return confirm('Hapus pimpinan tertinggi?')">
-                            @csrf @method('DELETE')
-                            <button class="bg-rose-500 text-white p-2 rounded-xl shadow-lg hover:bg-rose-600">
-                                <i data-lucide="trash-2" size="14"></i>
-                            </button>
-                        </form>
-                    </div>
-                    @endif
-                </div>
-
-                @if($kepala->bawahan->count() > 0)
-                    <div class="h-12 w-1 bg-slate-200"></div>
-                    <div class="flex gap-12 items-start">
-                        @foreach($kepala->bawahan as $staf)
-                            <div class="flex flex-col items-center relative">
-                                <div class="h-8 w-1 bg-slate-200"></div>
-
-                                {{-- 2. LEVEL STAFF (Bawah Pimpinan) --}}
-                                <div class="relative group">
-                                    <div class="bg-white border-2 border-slate-100 p-5 rounded-[1.5rem] w-52 text-center shadow-sm hover:shadow-xl hover:border-blue-100 transition-all">
-                                        <p class="text-[9px] text-blue-600 uppercase font-black tracking-widest mb-1">{{ $staf->jabatan }}</p>
-                                        <h4 class="text-sm font-bold text-slate-800">{{ $staf->name }}</h4>
-                                        <p class="text-[10px] text-slate-400 mt-1 uppercase">{{ $staf->role }}</p>
+    {{-- Tabel Data --}}
+    <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-gray-100/50">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-50/50 border-b border-gray-100 tracking-widest font-black">
+                    <tr>
+                        <th scope="col" class="px-6 py-5 rounded-tl-[2rem]">Profil & Nama</th>
+                        <th scope="col" class="px-6 py-5">Jabatan</th>
+                        <th scope="col" class="px-6 py-5">Role Akses</th>
+                        <th scope="col" class="px-6 py-5">Email</th>
+                        <th scope="col" class="px-6 py-5">Password (Admin)</th>
+                        <th scope="col" class="px-6 py-5 text-center rounded-tr-[2rem]">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50/50">
+                    @forelse($users as $u)
+                        <tr class="hover:bg-blue-50/30 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 overflow-hidden shrink-0">
+                                        @if($u->foto)
+                                            <img src="{{ asset('storage/' . $u->foto) }}" alt="Foto" class="w-full h-full object-cover">
+                                        @else
+                                            <i data-lucide="user" size="20"></i>
+                                        @endif
                                     </div>
-
-                                    @if(Auth::user()->role == 'admin')
-                                    <div class="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                        <form action="{{ route('admin.struktur.hapus', $staf->id) }}" method="POST" onsubmit="return confirm('Hapus {{ $staf->name }}?')">
-                                            @csrf @method('DELETE')
-                                            <button class="bg-rose-500 text-white p-1.5 rounded-lg shadow-md hover:bg-rose-600">
-                                                <i data-lucide="trash-2" size="12"></i>
-                                            </button>
-                                        </form>
+                                    <div>
+                                        <p class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{{ $u->name }}</p>
+                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">ID: {{ str_pad($u->id, 4, '0', STR_PAD_LEFT) }}</p>
                                     </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-gray-600">{{ $u->jabatan ?: '-' }}</td>
+                            <td class="px-6 py-4">
+                                @php
+                                    // Spatie roles if used, or standard role column
+                                    $roles = class_uses($u, \Spatie\Permission\Traits\HasRoles::class) ? $u->getRoleNames() : collect([$u->role]);
+                                @endphp
+                                @foreach($roles as $r)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest 
+                                        {{ $r === 'admin' ? 'bg-emerald-100 text-emerald-700' : ($r === 'sekretariat' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
+                                        {{ $r }}
+                                    </span>
+                                @endforeach
+                            </td>
+                            <td class="px-6 py-4 text-gray-500 font-medium">{{ $u->email }}</td>
+                            <td class="px-6 py-4">
+                                @if(Auth::user()->role == 'admin')
+                                    <div class="flex items-center gap-2">
+                                        <span class="password-field text-gray-500 font-mono text-sm tracking-widest"
+                                              data-password="{{ e($u->plain_password ?? 'N/A') }}"
+                                              data-visible="0">
+                                            &#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;
+                                        </span>
+                                        <button type="button" onclick="togglePassword(this)"
+                                                class="text-gray-400 hover:text-blue-500 transition-colors"
+                                                title="Lihat Password">
+                                            <i data-lucide="eye-off" size="14"></i>
+                                        </button>
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 font-medium italic">Rahasia</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-2">
+                                    @if(Auth::user()->role == 'admin' && $u->id !== Auth::user()->id)
+                                    <button onclick="konfirmasiHapus({{ $u->id }}, '{{ $u->name }}')" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                                        <i data-lucide="trash-2" size="14"></i>
+                                    </button>
                                     @endif
                                 </div>
-
-                                {{-- 3. LEVEL SUB-STAFF (Anak Buah Staff) --}}
-                                @if($staf->bawahan->count() > 0)
-                                    <div class="h-8 w-1 bg-slate-200"></div>
-                                    <div class="space-y-3">
-                                        @foreach($staf->bawahan as $subStaf)
-                                            <div class="relative group">
-                                                <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl w-44 text-center shadow-sm hover:bg-white hover:border-blue-200 transition-all">
-                                                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{{ $subStaf->jabatan }}</p>
-                                                    <h5 class="text-xs font-bold text-slate-700">{{ $subStaf->name }}</h5>
-                                                </div>
-
-                                                @if(Auth::user()->role == 'admin')
-                                                <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-all">
-                                                    <form action="{{ route('admin.struktur.hapus', $subStaf->id) }}" method="POST" onsubmit="return confirm('Hapus {{ $subStaf->name }}?')">
-                                                        @csrf @method('DELETE')
-                                                        <button class="bg-rose-500 text-white p-1 rounded-lg shadow-md hover:bg-rose-600">
-                                                            <i data-lucide="trash-2" size="10"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        @else
-            <div class="flex flex-col items-center justify-center text-center">
-                <i data-lucide="sitemap" class="text-slate-200 mb-4" size="64"></i>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Belum ada struktur organisasi</p>
-            </div>
-        @endif
-    </div>
-</div>
-
-{{-- MODAL TAMBAH (ADMIN ONLY) --}}
-@if(Auth::user()->role == 'admin')
-<div id="modalTambah" class="fixed inset-0 z-[999] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-    <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-modal relative">
-        <button onclick="closeModalTambah()" class="absolute top-6 right-6 text-slate-300 hover:text-slate-600">
-            <i data-lucide="x" size="24"></i>
-        </button>
-
-        <div class="mb-6">
-            <h3 class="text-xl font-black text-slate-800">Tambah Anggota</h3>
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Staf Baru CareHub</p>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center justify-center text-gray-400">
+                                    <i data-lucide="users" size="48" class="mb-4 text-gray-200"></i>
+                                    <p class="font-bold uppercase tracking-widest text-xs">Belum ada data anggota</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
-        <form action="{{ route('admin.struktur.simpan') }}" method="POST" class="space-y-4">
-            @csrf
-            <div>
-                <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Nama Lengkap</label>
-                <input type="text" name="name" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm font-bold">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Email</label>
-                    <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm font-bold">
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Password</label>
-                    <input type="password" name="password" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm font-bold">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Role</label>
-                    <select name="role" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm font-bold">
-                        <option value="admin">Admin</option>
-                        <option value="sekretariat">Sekretariat</option>
-                        <option value="bendahara">Bendahara</option>
-                        <option value="karyawan">Karyawan</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Jabatan</label>
-                    <input type="text" name="jabatan" placeholder="Kepala Divisi" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm font-bold">
-                </div>
-            </div>
-
-            <div>
-                <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Atasan Langsung</label>
-                <select name="parent_id" class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm font-bold">
-                    <option value="">-- Pucuk Pimpinan --</option>
-                    @foreach(\App\Models\User::all() as $u)
-                        <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->jabatan }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-100 transition-all text-xs uppercase tracking-widest mt-4">
-                Simpan & Update Bagan
-            </button>
-        </form>
     </div>
 </div>
-@endif
 
 @push('scripts')
 <script>
-    function openModalTambah() {
-        const modal = document.getElementById('modalTambah');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+    // ── Toggle Password ─────────────────────────────────────────────────────
+    function togglePassword(btn) {
+        const span = btn.previousElementSibling;
+        const icon = btn.querySelector('i');
+        const isVisible = span.getAttribute('data-visible') === '1';
+
+        if (isVisible) {
+            // Sembunyikan → mata tertutup (dicoret)
+            span.textContent = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+            span.setAttribute('data-visible', '0');
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            // Tampilkan → mata terbuka
+            span.textContent = span.getAttribute('data-password');
+            span.setAttribute('data-visible', '1');
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        lucide.createIcons();
     }
 
-    function closeModalTambah() {
-        const modal = document.getElementById('modalTambah');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+    // ── Konfirmasi Hapus ────────────────────────────────────────────────────
+    async function konfirmasiHapus(id, nama) {
+        const confirmed = await showConfirm(`Hapus ${nama} secara permanen?`);
+        if (confirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/struktur/hapus/${id}`;
+            form.innerHTML = `
+                @csrf
+                @method('DELETE')
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
     }
+
+    // ── Toast dari query param setelah redirect ─────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        const params = new URLSearchParams(window.location.search);
+        const toast = params.get('toast');
+        const toastType = params.get('toast_type') || 'success';
+        if (toast) {
+            showToast(decodeURIComponent(toast), toastType);
+            // Bersihkan query param dari URL tanpa reload
+            const url = new URL(window.location);
+            url.searchParams.delete('toast');
+            url.searchParams.delete('toast_type');
+            window.history.replaceState({}, '', url);
+        }
+    });
 </script>
 @endpush
 @endsection

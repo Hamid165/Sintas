@@ -6,15 +6,21 @@
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm gap-4">
         <div class="w-full lg:w-auto">
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Pusat Audit Keuangan</h3>
-            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Validasi Mutasi Kas Berbasis Dokumen Resmi</p>
+            <p class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-widest">Total: <span id="statTotalAudit">0</span> Audit Terverifikasi</p>
         </div>
-        <div class="flex gap-2">
-            <button onclick="openExportAudit()" class="bg-emerald-600 text-white px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2">
-                <i data-lucide="download" size="16"></i> Export
-            </button>
-            <button onclick="openModalTambahAudit()" class="bg-blue-600 text-white px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2">
-                <i data-lucide="plus" size="16"></i> Audit Baru
-            </button>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            <div class="relative w-full sm:w-auto">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
+                <input type="text" id="searchAudit" placeholder="Cari audit..." class="pl-10 pr-4 py-3 md:py-3.5 bg-gray-50 border-0 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-200 transition-all w-full sm:w-60 md:w-72">
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button onclick="openExportAudit()" class="flex-1 sm:flex-none justify-center bg-emerald-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="file-spreadsheet" size="16"></i> Export
+                </button>
+                <a href="{{ route('admin.audit.keuangan.tambah') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="plus" size="16"></i> Audit Baru
+                </a>
+            </div>
         </div>
     </div>
 
@@ -50,79 +56,66 @@
     </div>
 
     <!-- Audit Table -->
-    <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600/10 to-indigo-600/10">
-            <h4 class="font-black text-sm uppercase tracking-[0.2em] text-slate-800 flex items-center gap-2">
-                <i data-lucide="shield-check" size="18" class="text-blue-600"></i>
-                Daftar Audit Keuangan
+    <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden w-full">
+        <div class="p-6 border-b border-[#D1D5DC] bg-gray-50/50 flex items-center justify-between">
+            <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-800 flex items-center gap-2">
+                <i data-lucide="shield-check" size="16" class="text-blue-600"></i> Daftar Audit Keuangan
             </h4>
-        </div>
-
-        <div class="p-6 border-b border-gray-200 bg-gray-50/50">
-            <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                <div class="relative flex-1">
-                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size="16"></i>
-                    <input type="text" id="searchAudit" placeholder="Cari audit..." class="pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-xl w-full text-xs font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-300 transition-all">
-                </div>
-            </div>
+            <span id="totalAuditLabel" class="text-[10px] font-black text-gray-400 uppercase">0 audit</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left whitespace-nowrap text-xs">
-                <thead class="bg-blue-50 text-slate-800 font-black uppercase border-b border-gray-200">
+                <thead class="bg-gray-50 text-[10px] font-black text-slate-800 uppercase border-b border-[#D1D5DC]">
                     <tr>
-                        <th class="px-6 py-4">No</th>
-                        <th class="px-6 py-4">
-                            <button onclick="toggleSortAudit('tanggal')" class="flex items-center gap-1.5 hover:text-blue-600" title="Urutkan">
-                                Tanggal Audit
-                                <span id="sortIconAudit" class="flex flex-col gap-[2px] opacity-40 hover:opacity-100">
-                                    <i data-lucide="chevrons-up-down" size="10"></i>
-                                </span>
-                            </button>
+                        <th class="px-6 py-5 w-8">No</th>
+                        <th class="px-6 py-5">Tanggal Audit</th>
+                        <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="setSortAudit('jenis')">
+                            <div class="flex items-center gap-2">Jenis Audit <i id="sortIconAuditjenis" class="sort-icon-audit text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
                         </th>
-                        <th class="px-6 py-4">Jenis Audit</th>
-                        <th class="px-6 py-4">Kode Dokumen</th>
-                        <th class="px-6 py-4">Keterangan</th>
-                        <th class="px-6 py-4 text-right">Nominal (Rp)</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                        <th class="px-6 py-4 text-center">Aksi</th>
+                        <th class="px-6 py-5">Kode Dokumen</th>
+                        <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="setSortAudit('keterangan')">
+                            <div class="flex items-center gap-2">Keterangan <i id="sortIconAuditketerangan" class="sort-icon-audit text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
+                        </th>
+                        <th class="px-6 py-5 text-right">Nominal (Rp)</th>
+                        <th class="px-6 py-5 text-center">Status</th>
+                        <th class="px-6 py-5 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody id="auditKeuanganTable" class="divide-y divide-gray-100">
-                    <tr><td colspan="8" class="px-8 py-12 text-center text-gray-400">
-                        <i data-lucide="loader" class="mx-auto mb-2 animate-spin text-blue-400" size="24"></i>
-                        <p class="text-xs font-bold uppercase">Memuat data...</p>
+                <tbody id="auditKeuanganTable" class="divide-y divide-gray-100 text-sm">
+                        <tr><td colspan="8" class="px-8 py-24 text-center text-gray-400">
+                        <i data-lucide="loader" class="mx-auto mb-3 animate-spin text-blue-400" size="28"></i>
+                        <p class="text-xs font-bold uppercase tracking-widest mt-2">Memuat data...</p>
                     </td></tr>
                 </tbody>
             </table>
         </div>
 
-        <div id="paginationAudit" class="hidden px-8 py-4 border-t border-gray-200 bg-gray-50/50 flex items-center justify-between text-xs">
-            <p id="paginationInfoAudit" class="text-gray-400 font-bold"></p>
+        <div id="paginationAudit" class="hidden px-8 py-5 border-t border-[#D1D5DC] bg-gray-50/50 flex items-center justify-between">
+            <p id="paginationInfoAudit" class="text-[11px] text-gray-400 font-bold uppercase tracking-widest"></p>
             <div id="paginationBtnsAudit" class="flex items-center gap-2"></div>
         </div>
     </div>
 </div>
 
 <!-- Modal Tambah Audit Keuangan -->
-<div id="modalTambahAudit" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6 border-b border-gray-200 flex items-center justify-between bg-blue-50">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center">
-                    <i data-lucide="plus-circle" size="20"></i>
-                </div>
-                <h3 class="font-black text-slate-800 uppercase">Audit Baru</h3>
+<div id="modalTambahAudit" class="fixed inset-0 z-[999] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-modal relative">
+        <button onclick="closeModal('modalTambahAudit')" class="absolute top-6 right-6 text-slate-300 hover:text-slate-600"><i data-lucide="x" size="22"></i></button>
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
+                <i data-lucide="shield-check" size="22"></i>
             </div>
-            <button onclick="closeModal('modalTambahAudit')" class="text-gray-400 hover:text-gray-600">
-                <i data-lucide="x" size="20"></i>
-            </button>
+            <div>
+                <h3 class="text-lg font-black text-slate-800">Audit Baru</h3>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Verifikasi Transaksi</p>
+            </div>
         </div>
 
-        <form id="formTambahAudit" class="p-6 space-y-4">
+        <form id="formTambahAudit" class="space-y-4">
             <div>
-                <label class="block text-xs font-black text-gray-700 mb-2 uppercase">Pilih Transaksi Keuangan</label>
-                <select name="keuangan_id" id="keuanganSelect" required class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <label class="text-[10px] font-black uppercase text-slate-400 ml-1 block mb-1">Pilih Transaksi Keuangan <span class="text-rose-500">*</span></label>
+                <select name="keuangan_id" id="keuanganSelect" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-400 text-sm font-bold outline-none">
                     <option value="">- Pilih Transaksi -</option>
                     @foreach($transaksiList as $t)
                         <option value="{{ $t->id }}">
@@ -133,8 +126,8 @@
             </div>
 
             <div>
-                <label class="block text-xs font-black text-gray-700 mb-2 uppercase">Jenis Audit</label>
-                <select name="jenis_audit" required class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <label class="text-[10px] font-black uppercase text-slate-400 ml-1 block mb-1">Jenis Audit <span class="text-rose-500">*</span></label>
+                <select name="jenis_audit" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-400 text-sm font-bold outline-none">
                     <option value="">- Pilih Jenis -</option>
                     <option value="MASUK">Pemasukan</option>
                     <option value="KELUAR">Pengeluaran</option>
@@ -142,19 +135,20 @@
             </div>
 
             <div>
-                <label class="block text-xs font-black text-gray-700 mb-2 uppercase">Kode Dokumen (Surat)</label>
-                <input type="text" name="kode_dokumen" placeholder="SRT-IN-2026-001 atau SRT-OUT-2026-001" required class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                <p class="text-[10px] text-gray-500 mt-2">Format: SRT-IN-YYYY-NNN (surat masuk) atau SRT-OUT-YYYY-NNN (surat keluar)</p>
+                <label class="text-[10px] font-black uppercase text-slate-400 ml-1 block mb-1">Kode Dokumen Surat <span class="text-rose-500">*</span></label>
+                <input type="text" name="kode_dokumen" placeholder="SM-APR-2026-001 atau SK-APR-2026-001" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-400 text-sm font-bold outline-none">
+                <p class="text-[10px] text-gray-400 mt-1 ml-1">Gunakan kode surat yang sudah ada di Rekap Sekretariat</p>
             </div>
 
             <div>
-                <label class="block text-xs font-black text-gray-700 mb-2 uppercase">Keterangan</label>
-                <textarea name="keterangan" placeholder="Catatan audit" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"></textarea>
+                <label class="text-[10px] font-black uppercase text-slate-400 ml-1 block mb-1">Keterangan</label>
+                <textarea name="keterangan" placeholder="Catatan audit (opsional)" rows="2" class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-400 text-sm outline-none resize-none"></textarea>
             </div>
-
-            <div class="flex gap-3 pt-4">
-                <button type="button" onclick="closeModal('modalTambahAudit')" class="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-50 transition-all">Batal</button>
-                <button type="submit" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all">Simpan Audit</button>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeModal('modalTambahAudit')" class="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-gray-500 font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all">Batal</button>
+                <button type="submit" id="btnSimpanAudit" class="flex-1 py-3.5 rounded-2xl bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+                    <i data-lucide="save" size="14"></i> Simpan Audit
+                </button>
             </div>
         </form>
     </div>
@@ -174,15 +168,52 @@
 
 {{-- Export modal is handled by the global openExportModal() in admin layout --}}
 
+@push('scripts')
 <script>
 let sortByAudit = 'tanggal';
 let sortDirAudit = 'desc';
-let currentPageAudit = 1;
 let keuanganData = [];
+
+function setSortAudit(column) {
+    if (sortByAudit === column) {
+        sortDirAudit = sortDirAudit === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortByAudit = column;
+        sortDirAudit = 'asc';
+    }
+    loadAuditKeuangan(1);
+    updateSortIconsAudit();
+}
+
+function updateSortIconsAudit() {
+    document.querySelectorAll('.sort-icon-audit').forEach(el => {
+        el.setAttribute('data-lucide', 'chevrons-up-down');
+        el.classList.remove('text-blue-500');
+        el.classList.add('text-gray-300');
+    });
+
+    if (sortByAudit === 'jenis' || sortByAudit === 'keterangan') {
+        const activeIcon = document.getElementById(`sortIconAudit${sortByAudit}`);
+        if(activeIcon) {
+            activeIcon.setAttribute('data-lucide', sortDirAudit === 'asc' ? 'chevron-up' : 'chevron-down');
+            activeIcon.classList.remove('text-gray-300');
+            activeIcon.classList.add('text-blue-500');
+        }
+    }
+    lucide.createIcons();
+}
+
+const getAuthHeaders = () => {
+    return {
+        'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    };
+};
 
 async function loadKeuanganOptions() {
     try {
-        const response = await fetch('/api/keuangan');
+        const response = await fetch('/api/keuangan-list', { headers: getAuthHeaders() });
         const data = await response.json();
         keuanganData = data.data || data;
 
@@ -203,7 +234,7 @@ async function loadKeuanganOptions() {
 async function loadAuditKeuangan(page = 1) {
     try {
         const search = document.getElementById('searchAudit').value;
-        const response = await fetch(`/api/audit-keuangan?page=${page}&search=${search}&sort=${sortByAudit}&direction=${sortDirAudit}`);
+        const response = await fetch(`/api/audit-keuangan?page=${page}&search=${search}&sort=${sortByAudit}&direction=${sortDirAudit}`, { headers: getAuthHeaders() });
         const data = await response.json();
 
         const tbody = document.getElementById('auditKeuanganTable');
@@ -216,24 +247,25 @@ async function loadAuditKeuangan(page = 1) {
             return;
         }
 
-        data.data.forEach((item, index) => {
+    data.data.forEach((item, index) => {
             const row = document.createElement('tr');
-            row.className = 'hover:bg-blue-50 transition-colors';
+            row.className = 'hover:bg-blue-50/30 transition-colors group';
             const isMasuk = item.jenis === 'MASUK';
-            const statusColor = isMasuk ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
-            
+
             row.innerHTML = `
-                <td class="px-6 py-4">${((data.current_page - 1) * data.per_page) + index + 1}</td>
-                <td class="px-6 py-4 font-bold">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 rounded-lg ${isMasuk ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} font-bold text-[10px]">${item.jenis}</span></td>
-                <td class="px-6 py-4 font-bold text-blue-600">${item.kode_dokumen}</td>
+                <td class="px-6 py-4 text-xs font-black text-gray-400">${((data.current_page - 1) * data.per_page) + index + 1}</td>
+                <td class="px-6 py-4 font-bold text-gray-800">${new Date(item.tanggal).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'})}</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-lg ${isMasuk ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'} font-black text-[10px] uppercase">${item.jenis}</span></td>
+                <td class="px-6 py-4"><span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">${item.kode_dokumen}</span></td>
                 <td class="px-6 py-4 text-gray-600 max-w-xs truncate">${item.keterangan || '-'}</td>
-                <td class="px-6 py-4 text-right font-bold">${isMasuk ? '+' : '-'} Rp ${parseInt(item.nominal).toLocaleString('id-ID')}</td>
-                <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-lg bg-blue-100 text-blue-700 font-bold text-[10px]">TERAUDIT</span></td>
-                <td class="px-6 py-4 text-center">
-                    <button onclick="deleteAudit(${item.id})" class="text-red-600 hover:text-red-700 font-bold" title="Hapus">
-                        <i data-lucide="trash-2" size="16"></i>
-                    </button>
+                <td class="px-6 py-4 text-right font-bold ${isMasuk ? 'text-emerald-700' : 'text-rose-600'}">${isMasuk ? '+' : '-'} Rp ${parseInt(item.nominal||0).toLocaleString('id-ID')}</td>
+                <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 font-black text-[10px] uppercase">TERAUDIT</span></td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-center gap-2">
+                        <button onclick="deleteAudit(${item.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                            <i data-lucide="trash-2" size="14"></i>
+                        </button>
+                    </div>
                 </td>
             `;
             tbody.appendChild(row);
@@ -246,26 +278,20 @@ async function loadAuditKeuangan(page = 1) {
         const pagination = document.getElementById('paginationAudit');
         if (data.last_page > 1) {
             pagination.classList.remove('hidden');
-            document.getElementById('paginationInfoAudit').textContent = `Halaman ${data.current_page} dari ${data.last_page} (Total: ${data.total} audit)`;
-            
+            const s = (data.current_page - 1) * data.per_page + 1;
+            const e = Math.min(data.current_page * data.per_page, data.total);
+            document.getElementById('paginationInfoAudit').textContent = `Menampilkan ${s}–${e} dari ${data.total} data`;
+
             const paginationBtns = document.getElementById('paginationBtnsAudit');
-            paginationBtns.innerHTML = '';
-
-            if (data.current_page > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-100';
-                prevBtn.textContent = 'Sebelumnya';
-                prevBtn.onclick = () => loadAuditKeuangan(data.current_page - 1);
-                paginationBtns.appendChild(prevBtn);
-            }
-
-            if (data.current_page < data.last_page) {
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-100';
-                nextBtn.textContent = 'Berikutnya';
-                nextBtn.onclick = () => loadAuditKeuangan(data.current_page + 1);
-                paginationBtns.appendChild(nextBtn);
-            }
+            paginationBtns.innerHTML = `
+                <button onclick="loadAuditKeuangan(${data.current_page - 1})" ${data.current_page <= 1 ? 'disabled' : ''} class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 disabled:opacity-40 transition-all">
+                    <i data-lucide="chevron-left" size="16"></i>
+                </button>
+                <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600 text-white font-black text-xs">${data.current_page}</span>
+                <button onclick="loadAuditKeuangan(${data.current_page + 1})" ${data.current_page >= data.last_page ? 'disabled' : ''} class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 disabled:opacity-40 transition-all">
+                    <i data-lucide="chevron-right" size="16"></i>
+                </button>`;
+            lucide.createIcons();
         } else {
             pagination.classList.add('hidden');
         }
@@ -313,9 +339,9 @@ async function deleteAudit(id) {
     if (!ok) return;
 
     try {
-        const response = await fetch(`/api/audit-keuangan/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/audit-keuangan/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
         if (response.ok) {
-            showSuccess('Audit berhasil dihapus');
+            showToast('Audit keuangan berhasil dihapus.', 'success');
             loadAuditKeuangan();
         }
     } catch (error) {
@@ -324,12 +350,17 @@ async function deleteAudit(id) {
 }
 
 function openModalTambahAudit() {
+    const el = document.getElementById('modalTambahAudit');
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+    lucide.createIcons();
     loadKeuanganOptions();
-    document.getElementById('modalTambahAudit').classList.remove('hidden');
 }
 
 function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
+    const el = document.getElementById(modalId);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
 }
 
 function openExportAudit() {
@@ -341,7 +372,7 @@ function openExportAudit() {
 }
 
 async function fetchAllAuditKeuangan() {
-    const res = await fetch('/api/audit-keuangan?per_page=9999');
+    const res = await fetch('/api/audit-keuangan?per_page=9999', { headers: getAuthHeaders() });
     const json = await res.json();
     return json.data || [];
 }
@@ -414,12 +445,7 @@ async function exportAuditCsv() {
     );
 }
 
-function showSuccess(message) {
-    document.getElementById('successTitle').textContent = 'Berhasil!';
-    document.getElementById('successMessage').textContent = message;
-    document.getElementById('modalSuccess').classList.remove('hidden');
-    setTimeout(() => closeModal('modalSuccess'), 3000);
-}
+
 
 document.getElementById('formTambahAudit').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -429,18 +455,23 @@ document.getElementById('formTambahAudit').addEventListener('submit', async (e) 
     try {
         const response = await fetch('/api/audit-keuangan', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+            headers: { 
+                ...getAuthHeaders(), 
+                'Content-Type': 'application/json', 
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+            },
             body: JSON.stringify(data)
         });
 
-        const result = await response.json();
+    const result = await response.json();
         if (response.ok) {
             closeModal('modalTambahAudit');
             e.target.reset();
-            showSuccess('Audit keuangan berhasil ditambahkan');
+            showToast('Audit keuangan berhasil ditambahkan', 'success');
             loadAuditKeuangan();
         } else {
-            alert('Gagal: ' + (result.message || 'Terjadi kesalahan'));
+            const errs = result.errors ? Object.values(result.errors).flat().join(' | ') : (result.message || 'Gagal menyimpan');
+            showToast(errs, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
@@ -457,4 +488,5 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAuditKeuangan();
 });
 </script>
+@endpush
 @endsection

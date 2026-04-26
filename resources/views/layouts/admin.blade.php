@@ -62,7 +62,7 @@
                 </a>
                 @endif
 
-                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'bendahara' || Auth::user()->role == 'karyawan')
+                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'karyawan')
                 <a href="{{ route('admin.inventori') }}" 
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.inventoris*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="package" size="20"></i>
@@ -78,7 +78,7 @@
                 </a>
                 @endif
 
-                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat')
+                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat' || Auth::user()->role == 'bendahara')
                 <a href="{{ route('admin.audit') }}" 
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.audit*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="shield-check" size="20"></i>
@@ -86,16 +86,21 @@
                 </a>
                 @endif
 
-                <a href="{{ route('admin.struktur') }}" 
-                class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.struktur') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-                    <i data-lucide="sitemap" size="20"></i>
-                    <span class="font-black text-xs uppercase tracking-widest">Struktur Organisasi</span>
-                </a>
+                @if(Auth::user()->role == 'admin')
+                    <a href="{{ route('admin.struktur') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.struktur') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                        <i data-lucide="network" size="20"></i>
+                        <span class="font-black text-xs uppercase tracking-widest">Struktur</span>
+                    </a>
+                    <a href="{{ route('admin.role.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.role.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                        <i data-lucide="shield-alert" size="20"></i>
+                        <span class="font-black text-xs uppercase tracking-widest">Hak Akses (RBAC)</span>
+                    </a>
+                @endif
             </nav>
 
             <div class="p-6 border-t border-white/10">
                 <button onclick="handleLogout()" class="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-rose-400 hover:bg-rose-400/10 transition-all font-black text-[10px] uppercase tracking-widest">
-                    <i data-lucide="log-out" size="18"></i> Keluar Sistem
+                    <i data-lucide="log-out" size="18"></i> Log Out
                 </button>
             </div>
         </aside>
@@ -122,6 +127,8 @@
                             Audit
                         @elseif(request()->routeIs('admin.profil'))
                             Profil Admin
+                        @elseif(request()->routeIs('admin.struktur'))
+                            Struktur
                         @else
                             CareHub
                         @endif
@@ -219,7 +226,7 @@
         }
         // ──────────────────────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', async () => {
-            // Toast check
+            // Toast dari URL query param (API-side redirects)
             const p = new URLSearchParams(window.location.search);
             const msg = p.get('toast');
             const type = p.get('type') || 'success';
@@ -227,6 +234,11 @@
                 showToast(decodeURIComponent(msg), type);
                 window.history.replaceState({}, '', window.location.pathname);
             }
+
+            // Toast dari Laravel session flash (web form redirects)
+            @if(session('toast'))
+                showToast(@json(session('toast')), '{{ session('toast_type', 'success') }}');
+            @endif
 
             // Sync User Profile (Avatar & Name)
             const token = localStorage.getItem('auth_token');
@@ -293,7 +305,17 @@
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user_name');
             localStorage.removeItem('user_email');
-            window.location.href = '/login';
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("logout") }}';
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
     <style>

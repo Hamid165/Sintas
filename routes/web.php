@@ -6,13 +6,20 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\AuditSekreteriatController;
 use App\Http\Controllers\AuditKeuanganController;
-use App\Http\Controllers\KeuanganController;
+use App\Http\Controllers\Api\KeuanganController;
 use App\Http\Controllers\Api\KunjunganTamuController;
+use App\Http\Controllers\RoleController;
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/api/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Lupa Password Routes
+Route::get('/lupa-password', [AuthController::class, 'showLupaPassword'])->name('lupa-password');
+Route::post('/api/lupa-password/kirim-otp', [AuthController::class, 'sendOtp']);
+Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('reset-password');
+Route::post('/api/reset-password', [AuthController::class, 'resetPassword']);
 
 // Redirect root to dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
@@ -26,11 +33,17 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/struktur-organisasi', [DashboardController::class, 'strukturOrganisasi'])->name('admin.struktur');
 
     // CRUD Struktur (Admin Only)
-    Route::get('/struktur/tambah', [DashboardController::class, 'tambahStaf'])->name('admin.struktur.tambah');
-    Route::post('/struktur/simpan', [DashboardController::class, 'simpanStaf'])->name('admin.struktur.simpan');
-    Route::get('/struktur/edit/{id}', [DashboardController::class, 'editStaf'])->name('admin.struktur.edit');
-    Route::post('/struktur/update/{id}', [DashboardController::class, 'updateStaf'])->name('admin.struktur.update');
-    Route::delete('/struktur/hapus/{id}', [DashboardController::class, 'hapusStaf'])->name('admin.struktur.hapus');
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/struktur/tambah', fn() => view('admin.sdm.tambah'))->name('admin.struktur.tambah');
+        Route::post('/struktur/simpan', [DashboardController::class, 'simpanStaf'])->name('admin.struktur.simpan');
+        Route::delete('/struktur/hapus/{id}', [DashboardController::class, 'hapusStaf'])->name('admin.struktur.hapus');
+    });
+
+    // Manajemen Hak Akses (Role & Permission)
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/roles', [RoleController::class, 'index'])->name('admin.role.index');
+        Route::put('/roles/{id}', [RoleController::class, 'update'])->name('admin.role.update');
+    });
 
     // Admin & Sekretariat
     Route::middleware(['role:admin,sekretariat'])->group(function () {
@@ -47,58 +60,26 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     });
 
     // Inventaris
-    Route::middleware(['role:admin,karyawan,bendahara'])->group(function () {
+    Route::middleware(['role:admin,karyawan'])->group(function () {
         Route::get('/inventori', fn() => view('admin.inventori.index'))->name('admin.inventori');
         Route::get('/inventori/tambah', fn() => view('admin.inventori.form'))->name('admin.inventori.tambah');
     });
 
     // Audit Menu
-    Route::middleware(['role:admin,sekretariat'])->group(function () {
+    Route::middleware(['role:admin,sekretariat,bendahara'])->group(function () {
         Route::get('/audit', fn() => view('admin.audit.index'))->name('admin.audit');
+    });
+
+    Route::middleware(['role:admin,bendahara'])->group(function () {
         Route::get('/audit/keuangan', [AuditKeuanganController::class, 'index'])->name('admin.audit.keuangan');
+        Route::get('/audit/keuangan/tambah', [AuditKeuanganController::class, 'create'])->name('admin.audit.keuangan.tambah');
+    });
+
+    Route::middleware(['role:admin,sekretariat'])->group(function () {
         Route::get('/audit/sekretariat', fn() => view('admin.audit.sekretariat.index'))->name('admin.audit.sekretariat');
-    });
-});
-
-// API Routes
-Route::prefix('api')->middleware(['auth'])->group(function () {
-    
-    // Surat
-    Route::get('/surat-masuk', [AuditSekreteriatController::class, 'getSuratMasuk']);
-    Route::post('/surat-masuk', [AuditSekreteriatController::class, 'storeSuratMasuk']);
-    Route::put('/surat-masuk/{suratMasuk}', [AuditSekreteriatController::class, 'updateSuratMasuk']);
-    Route::delete('/surat-masuk/{suratMasuk}', [AuditSekreteriatController::class, 'destroySuratMasuk']);
-
-    Route::get('/surat-keluar', [AuditSekreteriatController::class, 'getSuratKeluar']);
-    Route::post('/surat-keluar', [AuditSekreteriatController::class, 'storeSuratKeluar']);
-    Route::put('/surat-keluar/{suratKeluar}', [AuditSekreteriatController::class, 'updateSuratKeluar']);
-    Route::delete('/surat-keluar/{suratKeluar}', [AuditSekreteriatController::class, 'destroySuratKeluar']);
-
-    // Audit Keuangan
-    Route::get('/audit-keuangan', [AuditKeuanganController::class, 'getAuditKeuangan']);
-    Route::post('/audit-keuangan', [AuditKeuanganController::class, 'store']);
-    Route::put('/audit-keuangan/{auditKeuangan}', [AuditKeuanganController::class, 'update']);
-    Route::delete('/audit-keuangan/{auditKeuangan}', [AuditKeuanganController::class, 'destroy']);
-
-    Route::get('/keuangan-list', [KeuanganController::class, 'getAll']);
-
-    // Export
-    Route::controller(ExportController::class)->group(function () {
-        Route::get('/export/surat-masuk-csv', 'suratMasukCsv');
-        Route::get('/export/surat-masuk-excel', 'suratMasukExcel');
-        Route::get('/export/surat-keluar-csv', 'suratKeluarCsv');
-        Route::get('/export/surat-keluar-excel', 'suratKeluarExcel');
-        Route::get('/export/audit-keuangan-csv', 'auditKeuanganCsv');
-        Route::get('/export/audit-keuangan-excel', 'auditKeuanganExcel');
-    });
-
-    // Kunjungan
-    Route::controller(KunjunganTamuController::class)->group(function () {
-        Route::get('/kunjungan-tamu', 'index');
-        Route::post('/kunjungan-tamu', 'store');
-        Route::get('/kunjungan-tamu/surat-options', 'getSuratOptions');
-        Route::get('/kunjungan-tamu/{id}', 'show');
-        Route::post('/kunjungan-tamu/{id}', 'update');
-        Route::delete('/kunjungan-tamu/{id}', 'destroy');
+        Route::get('/audit/sekretariat/tambah-masuk', fn() => view('admin.audit.sekretariat.tambah-masuk'))->name('admin.audit.sekretariat.tambah-masuk');
+        Route::get('/audit/sekretariat/tambah-keluar', fn() => view('admin.audit.sekretariat.tambah-keluar'))->name('admin.audit.sekretariat.tambah-keluar');
+        Route::get('/audit/sekretariat/edit-masuk', fn() => view('admin.audit.sekretariat.tambah-masuk'))->name('admin.audit.sekretariat.edit-masuk');
+        Route::get('/audit/sekretariat/edit-keluar', fn() => view('admin.audit.sekretariat.tambah-keluar'))->name('admin.audit.sekretariat.edit-keluar');
     });
 });
