@@ -30,10 +30,7 @@ class DashboardController extends Controller
 
     public function strukturOrganisasi()
     {
-        $users = User::orderByRaw("CASE WHEN role = 'admin' THEN 1 ELSE 2 END")
-                     ->orderBy('id', 'desc')
-                     ->get();
-        return view('admin.sdm.struktur', compact('users'));
+        return view('admin.sdm.struktur');
     }
     // Simpan Staf Baru
     public function simpanStaf(Request $request) {

@@ -41,8 +41,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     // Manajemen Hak Akses (Role & Permission)
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/roles', [RoleController::class, 'index'])->name('admin.role.index');
-        Route::put('/roles/{id}', [RoleController::class, 'update'])->name('admin.role.update');
+        Route::get('/roles', fn() => view('admin.sdm.role'))->name('admin.role.index');
     });
 
     // Admin & Sekretariat

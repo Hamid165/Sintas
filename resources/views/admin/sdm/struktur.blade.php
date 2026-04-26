@@ -35,76 +35,10 @@
                         <th scope="col" class="px-6 py-5 text-center rounded-tr-[2rem]">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50/50">
-                    @forelse($users as $u)
-                        <tr class="hover:bg-blue-50/30 transition-colors group">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 overflow-hidden shrink-0">
-                                        @if($u->foto)
-                                            <img src="{{ asset('storage/' . $u->foto) }}" alt="Foto" class="w-full h-full object-cover">
-                                        @else
-                                            <i data-lucide="user" size="20"></i>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{{ $u->name }}</p>
-                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">ID: {{ str_pad($u->id, 4, '0', STR_PAD_LEFT) }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 font-bold text-gray-600">{{ $u->jabatan ?: '-' }}</td>
-                            <td class="px-6 py-4">
-                                @php
-                                    // Spatie roles if used, or standard role column
-                                    $roles = class_uses($u, \Spatie\Permission\Traits\HasRoles::class) ? $u->getRoleNames() : collect([$u->role]);
-                                @endphp
-                                @foreach($roles as $r)
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest 
-                                        {{ $r === 'admin' ? 'bg-emerald-100 text-emerald-700' : ($r === 'sekretariat' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
-                                        {{ $r }}
-                                    </span>
-                                @endforeach
-                            </td>
-                            <td class="px-6 py-4 text-gray-500 font-medium">{{ $u->email }}</td>
-                            <td class="px-6 py-4">
-                                @if(Auth::user()->role == 'admin')
-                                    <div class="flex items-center gap-2">
-                                        <span class="password-field text-gray-500 font-mono text-sm tracking-widest"
-                                              data-password="{{ e($u->plain_password ?? 'N/A') }}"
-                                              data-visible="0">
-                                            &#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;
-                                        </span>
-                                        <button type="button" onclick="togglePassword(this)"
-                                                class="text-gray-400 hover:text-blue-500 transition-colors"
-                                                title="Lihat Password">
-                                            <i data-lucide="eye-off" size="14"></i>
-                                        </button>
-                                    </div>
-                                @else
-                                    <span class="text-gray-400 font-medium italic">Rahasia</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center justify-center gap-2">
-                                    @if(Auth::user()->role == 'admin' && $u->id !== Auth::user()->id)
-                                    <button onclick="konfirmasiHapus({{ $u->id }}, '{{ $u->name }}')" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
-                                        <i data-lucide="trash-2" size="14"></i>
-                                    </button>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center text-gray-400">
-                                    <i data-lucide="users" size="48" class="mb-4 text-gray-200"></i>
-                                    <p class="font-bold uppercase tracking-widest text-xs">Belum ada data anggota</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
+                <tbody id="strukturTableBody" class="divide-y divide-gray-50/50">
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">Memuat data anggota...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -113,6 +47,112 @@
 
 @push('scripts')
 <script>
+    const token = localStorage.getItem('auth_token');
+    const currentUserRole = '{{ Auth::user()->role }}';
+    const currentUserId = {{ Auth::user()->id }};
+    const csrfToken = '{{ csrf_token() }}';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        fetchSdmData();
+    });
+
+    async function fetchSdmData() {
+        try {
+            const res = await fetch('/api/sdm', {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+            });
+            const users = await res.json();
+            renderTable(users);
+        } catch (error) {
+            console.error('Error fetching SDM data:', error);
+            showToast('Gagal mengambil data struktur SDM', 'error');
+        }
+    }
+
+    function renderTable(users) {
+        const tbody = document.getElementById('strukturTableBody');
+        if (!users.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center text-gray-400">
+                            <i data-lucide="users" size="48" class="mb-4 text-gray-200"></i>
+                            <p class="font-bold uppercase tracking-widest text-xs">Belum ada data anggota</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        tbody.innerHTML = users.map(u => {
+            const imgHtml = u.foto 
+                ? `<img src="/storage/${u.foto}" alt="Foto" class="w-full h-full object-cover">`
+                : `<i data-lucide="user" size="20"></i>`;
+                
+            const rolesHtml = (u.spatie_roles || []).map(r => {
+                const colorClass = r === 'admin' ? 'bg-emerald-100 text-emerald-700' 
+                                : (r === 'sekretariat' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700');
+                return `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${colorClass}">${r}</span>`;
+            }).join(' ');
+
+            let passwordHtml = '<span class="text-gray-400 font-medium italic">Rahasia</span>';
+            if (currentUserRole === 'admin') {
+                const safePw = (u.plain_password || 'N/A').replace(/"/g, '&quot;');
+                passwordHtml = `
+                    <div class="flex items-center gap-2">
+                        <span class="password-field text-gray-500 font-mono text-sm tracking-widest"
+                                data-password="${safePw}"
+                                data-visible="0">
+                            &#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;
+                        </span>
+                        <button type="button" onclick="togglePassword(this)"
+                                class="text-gray-400 hover:text-blue-500 transition-colors"
+                                title="Lihat Password">
+                            <i data-lucide="eye-off" size="14"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+            let actionHtml = '';
+            if (currentUserRole === 'admin' && u.id !== currentUserId) {
+                actionHtml = `
+                    <button onclick="konfirmasiHapus(${u.id}, '${u.name.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                        <i data-lucide="trash-2" size="14"></i>
+                    </button>
+                `;
+            }
+
+            return `
+                <tr class="hover:bg-blue-50/30 transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 overflow-hidden shrink-0">
+                                ${imgHtml}
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">${u.name}</p>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">ID: ${String(u.id).padStart(4, '0')}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-gray-600">${u.jabatan || '-'}</td>
+                    <td class="px-6 py-4">${rolesHtml}</td>
+                    <td class="px-6 py-4 text-gray-500 font-medium">${u.email}</td>
+                    <td class="px-6 py-4">${passwordHtml}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-center gap-2">
+                            ${actionHtml}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        lucide.createIcons();
+    }
     // ── Toggle Password ─────────────────────────────────────────────────────
     function togglePassword(btn) {
         const span = btn.previousElementSibling;
@@ -138,15 +178,21 @@
     async function konfirmasiHapus(id, nama) {
         const confirmed = await showConfirm(`Hapus ${nama} secara permanen?`);
         if (confirmed) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/admin/struktur/hapus/${id}`;
-            form.innerHTML = `
-                @csrf
-                @method('DELETE')
-            `;
-            document.body.appendChild(form);
-            form.submit();
+            try {
+                const res = await fetch(`/api/sdm/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                });
+                if (res.ok) {
+                    showToast(`${nama} berhasil dihapus dari struktur.`, 'success');
+                    fetchSdmData();
+                } else {
+                    showToast('Gagal menghapus anggota.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Terjadi kesalahan.', 'error');
+            }
         }
     }
 

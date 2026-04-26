@@ -126,4 +126,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/kunjungan-tamu/{id}', 'update');
         Route::delete('/kunjungan-tamu/{id}', 'destroy');
     });
+    // SDM / User Management
+    Route::controller(\App\Http\Controllers\Api\SdmController::class)->group(function () {
+        Route::get('/sdm', 'index');
+        Route::post('/sdm', 'store');
+        Route::delete('/sdm/{id}', 'destroy');
+        Route::get('/sdm/roles', 'roles');
+    });
+
+    // Roles & Permissions
+    Route::controller(\App\Http\Controllers\Api\RoleController::class)->group(function () {
+        Route::get('/roles-permissions', 'index');
+        Route::put('/roles-permissions/{id}', 'update');
+    });
 });

@@ -26,7 +26,7 @@
 
     {{-- Form --}}
     <div class="bg-white rounded-[2rem] border-0 shadow-sm p-10">
-        <form action="{{ route('admin.struktur.simpan') }}" method="POST" class="space-y-6">
+        <form id="sdmForm" class="space-y-6">
             @csrf
             
             <div class="space-y-2">
@@ -59,10 +59,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Role (RBAC) <span class="text-rose-500">*</span></label>
-                    <select name="role" required class="w-full p-4 bg-gray-50 border-0 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 transition-all text-sm appearance-none">
-                        @foreach(\Spatie\Permission\Models\Role::all() as $r)
-                            <option value="{{ $r->name }}">{{ ucfirst($r->name) }}</option>
-                        @endforeach
+                    <select name="role" id="roleSelect" required class="w-full p-4 bg-gray-50 border-0 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 transition-all text-sm appearance-none">
+                        <option value="">Memuat roles...</option>
                     </select>
                 </div>
                 <div class="space-y-2">
@@ -90,9 +88,57 @@
 
 @push('scripts')
 <script>
+    const token = localStorage.getItem('auth_token');
+
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
+        fetchRoles();
+
+        document.getElementById('sdmForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitForm();
+        });
     });
+
+    async function fetchRoles() {
+        try {
+            const res = await fetch('/api/sdm/roles', {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+            });
+            const roles = await res.json();
+            const select = document.getElementById('roleSelect');
+            select.innerHTML = roles.map(r => `<option value="${r.name}">${r.name.charAt(0).toUpperCase() + r.name.slice(1)}</option>`).join('');
+        } catch (e) {
+            console.error('Failed to load roles');
+        }
+    }
+
+    async function submitForm() {
+        const form = document.getElementById('sdmForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const res = await fetch('/api/sdm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+                window.location.href = '/admin/struktur-organisasi?toast=' + encodeURIComponent(result.message);
+            } else {
+                showToast(result.message || 'Terjadi kesalahan validasi', 'error');
+            }
+        } catch (e) {
+            showToast('Terjadi kesalahan jaringan', 'error');
+        }
+    }
 
     function togglePasswordVisibility() {
         const input = document.getElementById('inputPassword');
