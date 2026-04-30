@@ -4,7 +4,14 @@
 @section('content')
 <div class="space-y-6 w-full">
 
-    {{-- ── Header Bar ────────────────────────────────────────────────────────── --}}
+    {{-- Back Link --}}
+    <div class="flex items-center gap-3">
+        <a href="{{ route('admin.audit') }}" class="flex items-center gap-2 text-gray-400 hover:text-orange-500 transition-colors font-black text-xs uppercase tracking-widest">
+            <i data-lucide="arrow-left" size="16"></i> Kembali ke Menu Audit
+        </a>
+    </div>
+
+    {{-- Header Bar --}}
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm gap-4">
         <div class="w-full lg:w-auto">
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Rekap Kesekretariatan</h3>
@@ -66,12 +73,14 @@
                             <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortMasuk('kode_surat')">
                                 <div class="flex items-center gap-2">Kode Surat <i id="sortIconMasukkode_surat" class="sort-icon-masuk text-gray-300 group-hover:text-orange-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
                             </th>
-                            <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortMasuk('perihal')">
-                                <div class="flex items-center gap-2">Perihal <i id="sortIconMasukperihal" class="sort-icon-masuk text-gray-300 group-hover:text-orange-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
-                            </th>
+                            <th class="px-6 py-5">Perihal</th>
                             <th class="px-6 py-5">Pengirim</th>
-                            <th class="px-6 py-5">Tgl Surat</th>
-                            <th class="px-6 py-5">Tgl Diterima</th>
+                            <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortMasuk('tanggal_surat')">
+                                <div class="flex items-center gap-2">Tgl Surat <i id="sortIconMasuktanggal_surat" class="sort-icon-masuk text-gray-300 group-hover:text-orange-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
+                            </th>
+                            <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortMasuk('tanggal_diterima')">
+                                <div class="flex items-center gap-2">Tgl Diterima <i id="sortIconMasuktanggal_diterima" class="sort-icon-masuk text-gray-300 group-hover:text-orange-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
+                            </th>
                             <th class="px-6 py-5 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -105,12 +114,14 @@
                             <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortKeluar('kode_surat')">
                                 <div class="flex items-center gap-2">Kode Surat <i id="sortIconKeluarkode_surat" class="sort-icon-keluar text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
                             </th>
-                            <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortKeluar('perihal')">
-                                <div class="flex items-center gap-2">Perihal <i id="sortIconKeluarperihal" class="sort-icon-keluar text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
-                            </th>
+                            <th class="px-6 py-5">Perihal</th>
                             <th class="px-6 py-5">Tujuan</th>
-                            <th class="px-6 py-5">Tgl Surat</th>
-                            <th class="px-6 py-5">Tgl Dikirim</th>
+                            <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortKeluar('tanggal_surat')">
+                                <div class="flex items-center gap-2">Tgl Surat <i id="sortIconKeluartanggal_surat" class="sort-icon-keluar text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
+                            </th>
+                            <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="applySortKeluar('tanggal_dikirim')">
+                                <div class="flex items-center gap-2">Tgl Dikirim <i id="sortIconKeluartanggal_dikirim" class="sort-icon-keluar text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
+                            </th>
                             <th class="px-6 py-5 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -245,7 +256,13 @@ function applySortMasuk(key) {
     if(sortMasukKey === key) sortMasukAsc = !sortMasukAsc;
     else { sortMasukKey = key; sortMasukAsc = true; }
     
+    const isDateKey = key === 'tanggal_surat' || key === 'tanggal_diterima';
     filteredMasuk.sort((a, b) => {
+        if (isDateKey) {
+            const da = new Date(a[key] || 0);
+            const db = new Date(b[key] || 0);
+            return sortMasukAsc ? da - db : db - da;
+        }
         let valA = (a[key] || '').toLowerCase();
         let valB = (b[key] || '').toLowerCase();
         if(valA < valB) return sortMasukAsc ? -1 : 1;
@@ -260,7 +277,13 @@ function applySortKeluar(key) {
     if(sortKeluarKey === key) sortKeluarAsc = !sortKeluarAsc;
     else { sortKeluarKey = key; sortKeluarAsc = true; }
     
+    const isDateKey = key === 'tanggal_surat' || key === 'tanggal_dikirim';
     filteredKeluar.sort((a, b) => {
+        if (isDateKey) {
+            const da = new Date(a[key] || 0);
+            const db = new Date(b[key] || 0);
+            return sortKeluarAsc ? da - db : db - da;
+        }
         let valA = (a[key] || '').toLowerCase();
         let valB = (b[key] || '').toLowerCase();
         if(valA < valB) return sortKeluarAsc ? -1 : 1;

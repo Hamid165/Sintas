@@ -78,7 +78,14 @@
                         <th class="px-6 py-5">Kategori</th>
                         <th class="px-6 py-5">Keterangan</th>
                         <th class="px-6 py-5">Jenis</th>
-                        <th class="px-6 py-5 text-right">Nominal</th>
+                        <th class="px-6 py-5 text-left">
+                            <button onclick="toggleSortNominal()" class="flex items-center gap-1.5 group hover:text-blue-600 transition-colors" title="Urutkan berdasarkan Nominal">
+                                NOMINAL
+                                <span id="sortIconNominal" class="flex flex-col gap-[2px] opacity-40 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="chevrons-up-down" size="12"></i>
+                                </span>
+                            </button>
+                        </th>
                         <th class="px-6 py-5 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -115,6 +122,7 @@
     let allData = [];
     let filteredData = [];
     let sortOrder = null; // null | 'asc' | 'desc'
+    let sortOrderNominal = null; // null | 'asc' | 'desc'
 
     document.addEventListener('DOMContentLoaded', () => {
         loadKeuangan();
@@ -145,15 +153,24 @@
     }
 
     function applySortToFiltered() {
-        if (!sortOrder) return;
-        filteredData.sort((a, b) => {
-            const da = new Date(a.created_at);
-            const db = new Date(b.created_at);
-            return sortOrder === 'asc' ? da - db : db - da;
-        });
+        if (sortOrderNominal) {
+            filteredData.sort((a, b) => {
+                const na = parseFloat(a.jumlah_nominal) || 0;
+                const nb = parseFloat(b.jumlah_nominal) || 0;
+                return sortOrderNominal === 'asc' ? na - nb : nb - na;
+            });
+        } else if (sortOrder) {
+            filteredData.sort((a, b) => {
+                const da = new Date(a.created_at);
+                const db = new Date(b.created_at);
+                return sortOrder === 'asc' ? da - db : db - da;
+            });
+        }
     }
 
     function toggleSort() {
+        sortOrderNominal = null;
+        resetSortIconNominal();
         if (sortOrder === null || sortOrder === 'desc') {
             sortOrder = 'asc';
         } else {
@@ -164,6 +181,38 @@
         renderPage(1);
     }
 
+    function toggleSortNominal() {
+        sortOrder = null;
+        resetSortIconDate();
+        if (sortOrderNominal === null || sortOrderNominal === 'desc') {
+            sortOrderNominal = 'asc';
+        } else {
+            sortOrderNominal = 'desc';
+        }
+        updateSortIconNominal();
+        applySortToFiltered();
+        renderPage(1);
+    }
+
+    function resetSortIconDate() {
+        const icon = document.getElementById('sortIcon');
+        icon.innerHTML = '<i data-lucide="chevrons-up-down" size="12"></i>';
+        icon.parentElement.classList.remove('text-blue-600');
+        icon.classList.add('opacity-40');
+        icon.classList.remove('opacity-100');
+        lucide.createIcons();
+    }
+
+    function resetSortIconNominal() {
+        const icon = document.getElementById('sortIconNominal');
+        if (!icon) return;
+        icon.innerHTML = '<i data-lucide="chevrons-up-down" size="12"></i>';
+        icon.parentElement.classList.remove('text-blue-600');
+        icon.classList.add('opacity-40');
+        icon.classList.remove('opacity-100');
+        lucide.createIcons();
+    }
+
     function updateSortIcon() {
         const icon = document.getElementById('sortIcon');
         if (sortOrder === 'asc') {
@@ -172,6 +221,22 @@
             icon.classList.remove('opacity-40');
             icon.classList.add('opacity-100');
         } else if (sortOrder === 'desc') {
+            icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="m6 9 6 6 6-6"/></svg>';
+            icon.parentElement.classList.add('text-blue-600');
+            icon.classList.remove('opacity-40');
+            icon.classList.add('opacity-100');
+        }
+    }
+
+    function updateSortIconNominal() {
+        const icon = document.getElementById('sortIconNominal');
+        if (!icon) return;
+        if (sortOrderNominal === 'asc') {
+            icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="m18 15-6-6-6 6"/></svg>';
+            icon.parentElement.classList.add('text-blue-600');
+            icon.classList.remove('opacity-40');
+            icon.classList.add('opacity-100');
+        } else if (sortOrderNominal === 'desc') {
             icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="m6 9 6 6 6-6"/></svg>';
             icon.parentElement.classList.add('text-blue-600');
             icon.classList.remove('opacity-40');
@@ -218,7 +283,7 @@
                         ${t.jenis_transaksi}
                     </span>
                 </td>
-                <td class="px-6 py-4 text-right font-black text-base ${t.jenis_transaksi === 'Pemasukan' ? 'text-emerald-600' : 'text-rose-600'}">
+                <td class="px-6 py-4 text-left font-black text-base ${t.jenis_transaksi === 'Pemasukan' ? 'text-emerald-600' : 'text-rose-600'}">
                     ${t.jenis_transaksi === 'Pemasukan' ? '+' : '-'} ${formatRp(nominal)}
                 </td>
                 <td class="px-6 py-4 text-center">

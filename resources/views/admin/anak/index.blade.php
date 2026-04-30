@@ -41,7 +41,14 @@
                                 </span>
                             </button>
                         </th>
-                        <th class="px-6 py-5">Usia</th>
+                        <th class="px-6 py-5">
+                            <button onclick="toggleSortUsia()" class="flex items-center gap-1.5 group hover:text-blue-600 transition-colors" title="Urutkan berdasarkan Usia">
+                                USIA
+                                <span id="sortIconUsia" class="flex flex-col gap-[2px] opacity-40 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="chevrons-up-down" size="12"></i>
+                                </span>
+                            </button>
+                        </th>
                         <th class="px-6 py-5">Jenis Kelamin</th>
                         <th class="px-6 py-5">Tempat / Tgl Lahir</th>
                         <th class="px-6 py-5">Riwayat Kesehatan</th>
@@ -81,6 +88,7 @@
     let filteredData = [];
     let currentPage = 1;
     let sortOrder = null; // null | 'asc' | 'desc'
+    let sortOrderUsia = null; // null | 'asc' | 'desc'
 
     document.addEventListener('DOMContentLoaded', () => {
         loadData();
@@ -112,15 +120,24 @@
     }
 
     function applySortToFiltered() {
-        if (!sortOrder) return;
-        filteredData.sort((a, b) => {
-            const na = (a.nama_lengkap || '').toLowerCase();
-            const nb = (b.nama_lengkap || '').toLowerCase();
-            return sortOrder === 'asc' ? na.localeCompare(nb) : nb.localeCompare(na);
-        });
+        if (sortOrderUsia) {
+            filteredData.sort((a, b) => {
+                const ua = parseInt(a.usia) || 0;
+                const ub = parseInt(b.usia) || 0;
+                return sortOrderUsia === 'asc' ? ua - ub : ub - ua;
+            });
+        } else if (sortOrder) {
+            filteredData.sort((a, b) => {
+                const na = (a.nama_lengkap || '').toLowerCase();
+                const nb = (b.nama_lengkap || '').toLowerCase();
+                return sortOrder === 'asc' ? na.localeCompare(nb) : nb.localeCompare(na);
+            });
+        }
     }
 
     function toggleSort() {
+        sortOrderUsia = null;
+        resetSortIconUsia();
         if (sortOrder === null || sortOrder === 'desc') {
             sortOrder = 'asc';
         } else {
@@ -131,6 +148,37 @@
         renderPage(1);
     }
 
+    function toggleSortUsia() {
+        sortOrder = null;
+        resetSortIcon();
+        if (sortOrderUsia === null || sortOrderUsia === 'desc') {
+            sortOrderUsia = 'asc';
+        } else {
+            sortOrderUsia = 'desc';
+        }
+        updateSortIconUsia();
+        applySortToFiltered();
+        renderPage(1);
+    }
+
+    function resetSortIcon() {
+        const icon = document.getElementById('sortIcon');
+        icon.innerHTML = '<i data-lucide="chevrons-up-down" size="12"></i>';
+        icon.parentElement.classList.remove('text-blue-600');
+        icon.classList.add('opacity-40');
+        icon.classList.remove('opacity-100');
+        lucide.createIcons();
+    }
+
+    function resetSortIconUsia() {
+        const icon = document.getElementById('sortIconUsia');
+        icon.innerHTML = '<i data-lucide="chevrons-up-down" size="12"></i>';
+        icon.parentElement.classList.remove('text-blue-600');
+        icon.classList.add('opacity-40');
+        icon.classList.remove('opacity-100');
+        lucide.createIcons();
+    }
+
     function updateSortIcon() {
         const icon = document.getElementById('sortIcon');
         if (sortOrder === 'asc') {
@@ -139,6 +187,21 @@
             icon.classList.remove('opacity-40');
             icon.classList.add('opacity-100');
         } else if (sortOrder === 'desc') {
+            icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="m6 9 6 6 6-6"/></svg>';
+            icon.parentElement.classList.add('text-blue-600');
+            icon.classList.remove('opacity-40');
+            icon.classList.add('opacity-100');
+        }
+    }
+
+    function updateSortIconUsia() {
+        const icon = document.getElementById('sortIconUsia');
+        if (sortOrderUsia === 'asc') {
+            icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="m18 15-6-6-6 6"/></svg>';
+            icon.parentElement.classList.add('text-blue-600');
+            icon.classList.remove('opacity-40');
+            icon.classList.add('opacity-100');
+        } else if (sortOrderUsia === 'desc') {
             icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="m6 9 6 6 6-6"/></svg>';
             icon.parentElement.classList.add('text-blue-600');
             icon.classList.remove('opacity-40');

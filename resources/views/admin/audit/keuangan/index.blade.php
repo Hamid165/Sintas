@@ -3,6 +3,14 @@
 
 @section('content')
 <div class="space-y-6 w-full">
+    {{-- Back Link --}}
+    <div class="flex items-center gap-3">
+        <a href="{{ route('admin.audit') }}" class="flex items-center gap-2 text-gray-400 hover:text-blue-600 transition-colors font-black text-xs uppercase tracking-widest">
+            <i data-lucide="arrow-left" size="16"></i> Kembali ke Menu Audit
+        </a>
+    </div>
+
+    {{-- Header Bar --}}
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm gap-4">
         <div class="w-full lg:w-auto">
             <h3 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Pusat Audit Keuangan</h3>
@@ -69,15 +77,17 @@
                 <thead class="bg-gray-50 text-[10px] font-black text-slate-800 uppercase border-b border-[#D1D5DC]">
                     <tr>
                         <th class="px-6 py-5 w-8">No</th>
-                        <th class="px-6 py-5">Tanggal Audit</th>
+                        <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="setSortAudit('tanggal')">
+                            <div class="flex items-center gap-2">Tanggal Audit <i id="sortIconAudittanggal" class="sort-icon-audit text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
+                        </th>
                         <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="setSortAudit('jenis')">
                             <div class="flex items-center gap-2">Jenis Audit <i id="sortIconAuditjenis" class="sort-icon-audit text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
                         </th>
-                        <th class="px-6 py-5">Kode Dokumen</th>
-                        <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="setSortAudit('keterangan')">
-                            <div class="flex items-center gap-2">Keterangan <i id="sortIconAuditketerangan" class="sort-icon-audit text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
+                        <th class="px-6 py-5 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="setSortAudit('kode_dokumen')">
+                            <div class="flex items-center gap-2">Kode Dokumen <i id="sortIconAuditkode_dokumen" class="sort-icon-audit text-gray-300 group-hover:text-blue-400 transition-colors" data-lucide="chevrons-up-down" size="14"></i></div>
                         </th>
-                        <th class="px-6 py-5 text-right">Nominal (Rp)</th>
+                        <th class="px-6 py-5">Keterangan</th>
+                        <th class="px-6 py-5 text-left">Nominal (Rp)</th>
                         <th class="px-6 py-5 text-center">Status</th>
                         <th class="px-6 py-5 text-center">Aksi</th>
                     </tr>
@@ -192,13 +202,11 @@ function updateSortIconsAudit() {
         el.classList.add('text-gray-300');
     });
 
-    if (sortByAudit === 'jenis' || sortByAudit === 'keterangan') {
-        const activeIcon = document.getElementById(`sortIconAudit${sortByAudit}`);
-        if(activeIcon) {
-            activeIcon.setAttribute('data-lucide', sortDirAudit === 'asc' ? 'chevron-up' : 'chevron-down');
-            activeIcon.classList.remove('text-gray-300');
-            activeIcon.classList.add('text-blue-500');
-        }
+    const activeIcon = document.getElementById(`sortIconAudit${sortByAudit}`);
+    if(activeIcon) {
+        activeIcon.setAttribute('data-lucide', sortDirAudit === 'asc' ? 'chevron-up' : 'chevron-down');
+        activeIcon.classList.remove('text-gray-300');
+        activeIcon.classList.add('text-blue-500');
     }
     lucide.createIcons();
 }
@@ -258,7 +266,7 @@ async function loadAuditKeuangan(page = 1) {
                 <td class="px-6 py-4"><span class="px-3 py-1 rounded-lg ${isMasuk ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'} font-black text-[10px] uppercase">${item.jenis}</span></td>
                 <td class="px-6 py-4"><span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">${item.kode_dokumen}</span></td>
                 <td class="px-6 py-4 text-gray-600 max-w-xs truncate">${item.keterangan || '-'}</td>
-                <td class="px-6 py-4 text-right font-bold ${isMasuk ? 'text-emerald-700' : 'text-rose-600'}">${isMasuk ? '+' : '-'} Rp ${parseInt(item.nominal||0).toLocaleString('id-ID')}</td>
+                <td class="px-6 py-4 font-bold ${isMasuk ? 'text-emerald-700' : 'text-rose-600'} text-left">${isMasuk ? '+' : '-'} Rp ${parseInt(item.nominal||0).toLocaleString('id-ID')}</td>
                 <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 font-black text-[10px] uppercase">TERAUDIT</span></td>
                 <td class="px-6 py-4">
                     <div class="flex items-center justify-center gap-2">
