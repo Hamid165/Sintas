@@ -99,6 +99,7 @@ class AuditKeuanganController extends Controller
         }
 
         $audit = AuditKeuangan::create($validated);
+        broadcast(new \App\Events\AuditKeuanganUpdated($audit, 'create'));
         return response()->json(['message' => 'Audit keuangan berhasil ditambahkan', 'data' => $audit], 201);
     }
 
@@ -130,6 +131,7 @@ class AuditKeuanganController extends Controller
         }
 
         $auditKeuangan->update($validated);
+        broadcast(new \App\Events\AuditKeuanganUpdated($auditKeuangan, 'update'));
         return response()->json(['message' => 'Audit keuangan berhasil diperbarui', 'data' => $auditKeuangan]);
     }
 
@@ -139,6 +141,7 @@ class AuditKeuanganController extends Controller
     public function destroy(AuditKeuangan $auditKeuangan)
     {
         $auditKeuangan->delete();
+        broadcast(new \App\Events\AuditKeuanganUpdated($auditKeuangan, 'delete'));
         return response()->json(['message' => 'Audit keuangan berhasil dihapus']);
     }
 }

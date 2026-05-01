@@ -494,6 +494,23 @@ document.getElementById('searchAudit').addEventListener('input', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadAuditKeuangan();
+
+    // ─── Real-Time Pusher Listener ──────────────────────────────────────
+    if (window.Echo) {
+        window.Echo.channel('audit-keuangan-channel')
+            .listen('AuditKeuanganUpdated', (e) => {
+                console.log('Real-time event received (Audit Keuangan):', e);
+                if (e.tipe_aksi === 'create') {
+                    showToast('Ada data audit keuangan baru masuk', 'info');
+                } else if (e.tipe_aksi === 'update') {
+                    showToast('Data audit keuangan telah diperbarui', 'warning');
+                } else {
+                    showToast('Data audit keuangan telah dihapus', 'error');
+                }
+                loadAuditKeuangan();
+            });
+    }
+    // ──────────────────────────────────────────────────────────────────
 });
 </script>
 @endpush

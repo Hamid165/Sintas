@@ -127,6 +127,25 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadKeuangan();
 
+        // ─── Real-Time Pusher Listener ──────────────────────────────────────
+        if (window.Echo) {
+            window.Echo.channel('keuangan-channel')
+                .listen('KeuanganUpdated', (e) => {
+                    console.log('Real-time event received:', e);
+                    if (e.tipe_aksi === 'create') {
+                        showToast('Ada data keuangan baru masuk', 'info');
+                    } else if (e.tipe_aksi === 'update') {
+                        showToast('Data keuangan telah diubah', 'warning');
+                    } else {
+                        showToast('Data keuangan telah dihapus', 'error');
+                    }
+                    
+                    // Langsung muat ulang tabel keuangan untuk mensinkronisasi data
+                    loadKeuangan();
+                });
+        }
+        // ──────────────────────────────────────────────────────────────────
+
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const keyword = e.target.value.toLowerCase();
             filteredData = allData.filter(t =>

@@ -609,6 +609,36 @@ async function exportSekretariatCsv() {
 document.addEventListener('DOMContentLoaded', () => {
     loadSuratMasuk();
     loadSuratKeluar();
+
+    // ─── Real-Time Pusher Listener ──────────────────────────────────────
+    if (window.Echo) {
+        window.Echo.channel('surat-masuk-channel')
+            .listen('SuratMasukUpdated', (e) => {
+                console.log('Real-time event received (Surat Masuk):', e);
+                if (e.tipe_aksi === 'create') {
+                    showToast('Ada data surat masuk baru', 'info');
+                } else if (e.tipe_aksi === 'update') {
+                    showToast('Data surat masuk telah diperbarui', 'warning');
+                } else {
+                    showToast('Data surat masuk telah dihapus', 'error');
+                }
+                loadSuratMasuk();
+            });
+
+        window.Echo.channel('surat-keluar-channel')
+            .listen('SuratKeluarUpdated', (e) => {
+                console.log('Real-time event received (Surat Keluar):', e);
+                if (e.tipe_aksi === 'create') {
+                    showToast('Ada data surat keluar baru', 'info');
+                } else if (e.tipe_aksi === 'update') {
+                    showToast('Data surat keluar telah diperbarui', 'warning');
+                } else {
+                    showToast('Data surat keluar telah dihapus', 'error');
+                }
+                loadSuratKeluar();
+            });
+    }
+    // ──────────────────────────────────────────────────────────────────
 });
 </script>
 @endpush

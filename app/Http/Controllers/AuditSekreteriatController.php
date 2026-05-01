@@ -98,6 +98,7 @@ class AuditSekreteriatController extends Controller
         ]);
 
         $surat = SuratMasuk::create($validated);
+        broadcast(new \App\Events\SuratMasukUpdated($surat, 'create'));
         return response()->json(['message' => 'Surat masuk berhasil ditambahkan', 'data' => $surat], 201);
     }
 
@@ -116,6 +117,7 @@ class AuditSekreteriatController extends Controller
         ]);
 
         $surat = SuratKeluar::create($validated);
+        broadcast(new \App\Events\SuratKeluarUpdated($surat, 'create'));
         return response()->json(['message' => 'Surat keluar berhasil ditambahkan', 'data' => $surat], 201);
     }
 
@@ -133,6 +135,7 @@ class AuditSekreteriatController extends Controller
         ]);
 
         $suratMasuk->update($validated);
+        broadcast(new \App\Events\SuratMasukUpdated($suratMasuk, 'update'));
         return response()->json(['message' => 'Surat masuk berhasil diperbarui', 'data' => $suratMasuk]);
     }
 
@@ -150,6 +153,7 @@ class AuditSekreteriatController extends Controller
         ]);
 
         $suratKeluar->update($validated);
+        broadcast(new \App\Events\SuratKeluarUpdated($suratKeluar, 'update'));
         return response()->json(['message' => 'Surat keluar berhasil diperbarui', 'data' => $suratKeluar]);
     }
 
@@ -159,6 +163,7 @@ class AuditSekreteriatController extends Controller
     public function destroySuratMasuk(SuratMasuk $suratMasuk)
     {
         $suratMasuk->delete();
+        broadcast(new \App\Events\SuratMasukUpdated($suratMasuk, 'delete'));
         return response()->json(['message' => 'Surat masuk berhasil dihapus']);
     }
 
@@ -168,6 +173,7 @@ class AuditSekreteriatController extends Controller
     public function destroySuratKeluar(SuratKeluar $suratKeluar)
     {
         $suratKeluar->delete();
+        broadcast(new \App\Events\SuratKeluarUpdated($suratKeluar, 'delete'));
         return response()->json(['message' => 'Surat keluar berhasil dihapus']);
     }
 }

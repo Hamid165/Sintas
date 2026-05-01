@@ -52,6 +52,7 @@ class KunjunganTamuController extends Controller
         }
 
         $kunjungan = KunjunganTamu::create($validated);
+        broadcast(new \App\Events\KunjunganUpdated($kunjungan, 'create'));
         return response()->json([
             'message' => 'Data kunjungan tamu berhasil ditambahkan.',
             'data'    => $kunjungan,
@@ -101,6 +102,7 @@ class KunjunganTamuController extends Controller
         }
 
         $item->update($data);
+        broadcast(new \App\Events\KunjunganUpdated($item, 'update'));
         return response()->json(['message' => 'Data berhasil diperbarui.', 'data' => $item]);
     }
 
@@ -116,6 +118,7 @@ class KunjunganTamuController extends Controller
         }
 
         $item->delete();
+        broadcast(new \App\Events\KunjunganUpdated($item, 'delete'));
         return response()->json(['message' => 'Data kunjungan tamu berhasil dihapus.']);
     }
 

@@ -28,6 +28,7 @@ class InventarisController extends Controller
         }
 
         $inventaris = Inventaris::create($validated);
+        broadcast(new \App\Events\InventarisUpdated($inventaris, 'create'));
         return response()->json($inventaris, 201);
     }
 
@@ -58,6 +59,7 @@ class InventarisController extends Controller
         }
 
         $inventaris->update($data);
+        broadcast(new \App\Events\InventarisUpdated($inventaris, 'update'));
         return response()->json($inventaris);
     }
 
@@ -68,6 +70,7 @@ class InventarisController extends Controller
             \Storage::disk('public')->delete($inventaris->gambar);
         }
         $inventaris->delete();
+        broadcast(new \App\Events\InventarisUpdated($inventaris, 'delete'));
         return response()->json(['message' => 'Data berhasil dihapus']);
     }
 }

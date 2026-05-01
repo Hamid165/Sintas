@@ -116,66 +116,98 @@ if (!token) window.location.href = '/login';
 const formatRp = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 const fmtDate  = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const res = await fetch('/api/dashboard', {
-            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
-        });
-        if (res.status === 401) { window.location.href = '/login'; return; }
-        const d = await res.json();
+async function loadDashboard() {
+        try {
+            const res = await fetch('/api/dashboard', {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+            });
+            if (res.status === 401) { window.location.href = '/login'; return; }
+            const d = await res.json();
 
-        // Stats
-        document.getElementById('statTotalAnak').innerText = d.total_anak ?? 0;
-        document.getElementById('statSaldoKas').innerText  = formatRp(d.total_saldo ?? 0);
-        document.getElementById('statBarang').innerText    = d.total_item ?? 0;
-        document.getElementById('statKunjungan').innerText = d.total_kunjungan ?? 0;
+            // Stats
+            document.getElementById('statTotalAnak').innerText = d.total_anak ?? 0;
+            document.getElementById('statSaldoKas').innerText  = formatRp(d.total_saldo ?? 0);
+            document.getElementById('statBarang').innerText    = d.total_item ?? 0;
+            document.getElementById('statKunjungan').innerText = d.total_kunjungan ?? 0;
 
-        // Recent Anak
-        const ra = document.getElementById('recentAnakList');
-        ra.innerHTML = d.recent_anak?.length
-            ? d.recent_anak.map(a => `
-                <div class="px-6 py-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black
-                        ${a.jenis_kelamin === 'Laki-laki' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}">
-                        ${a.nama_lengkap.charAt(0)}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-black text-slate-800 text-xs truncate">${a.nama_lengkap}</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">${a.tempat_tgl_lahir || '-'}</p>
-                    </div>
-                    <span class="text-[10px] font-black px-2 py-0.5 rounded-lg
-                        ${a.jenis_kelamin === 'Laki-laki' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}">
-                        ${a.jenis_kelamin === 'Laki-laki' ? 'L' : 'P'}
-                    </span>
-                </div>`).join('')
-            : '<div class="px-6 py-10 text-center text-gray-400 text-xs font-bold">Belum ada data.</div>';
+            // Recent Anak
+            const ra = document.getElementById('recentAnakList');
+            ra.innerHTML = d.recent_anak?.length
+                ? d.recent_anak.map(a => `
+                    <div class="px-6 py-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black
+                            ${a.jenis_kelamin === 'Laki-laki' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}">
+                            ${a.nama_lengkap.charAt(0)}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-black text-slate-800 text-xs truncate">${a.nama_lengkap}</p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">${a.tempat_tgl_lahir || '-'}</p>
+                        </div>
+                        <span class="text-[10px] font-black px-2 py-0.5 rounded-lg
+                            ${a.jenis_kelamin === 'Laki-laki' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}">
+                            ${a.jenis_kelamin === 'Laki-laki' ? 'L' : 'P'}
+                        </span>
+                    </div>`).join('')
+                : '<div class="px-6 py-10 text-center text-gray-400 text-xs font-bold">Belum ada data.</div>';
 
-        // Recent Keuangan
-        const rk = document.getElementById('recentKeuanganList');
-        rk.innerHTML = d.recent_keuangan?.length
-            ? d.recent_keuangan.map(t => `
-                <div class="px-6 py-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
-                    <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0
-                        ${t.jenis_transaksi === 'Pemasukan' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            ${t.jenis_transaksi === 'Pemasukan' ? '<path d="m18 15-6-6-6 6"/>' : '<path d="m6 9 6 6 6-6"/>'}
-                        </svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-black text-slate-800 text-xs truncate">${t.keterangan || t.kategori || '-'}</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">${fmtDate(t.created_at)}</p>
-                    </div>
-                    <p class="font-black text-xs flex-shrink-0 ${t.jenis_transaksi === 'Pemasukan' ? 'text-emerald-600' : 'text-rose-600'}">
-                        ${t.jenis_transaksi === 'Pemasukan' ? '+' : '-'} ${formatRp(t.jumlah_nominal)}
-                    </p>
-                </div>`).join('')
-            : '<div class="px-6 py-10 text-center text-gray-400 text-xs font-bold">Belum ada transaksi.</div>';
+            // Recent Keuangan
+            const rk = document.getElementById('recentKeuanganList');
+            rk.innerHTML = d.recent_keuangan?.length
+                ? d.recent_keuangan.map(t => `
+                    <div class="px-6 py-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0
+                            ${t.jenis_transaksi === 'Pemasukan' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                ${t.jenis_transaksi === 'Pemasukan' ? '<path d="m18 15-6-6-6 6"/>' : '<path d="m6 9 6 6 6-6"/>'}
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-black text-slate-800 text-xs truncate">${t.keterangan || t.kategori || '-'}</p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">${fmtDate(t.created_at)}</p>
+                        </div>
+                        <p class="font-black text-xs flex-shrink-0 ${t.jenis_transaksi === 'Pemasukan' ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${t.jenis_transaksi === 'Pemasukan' ? '+' : '-'} ${formatRp(t.jumlah_nominal)}
+                        </p>
+                    </div>`).join('')
+                : '<div class="px-6 py-10 text-center text-gray-400 text-xs font-bold">Belum ada transaksi.</div>';
 
-        lucide.createIcons();
-    } catch (e) {
-        console.error('Dashboard error:', e);
+            lucide.createIcons();
+        } catch (e) {
+            console.error('Dashboard error:', e);
+        }
     }
-});
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDashboard();
+
+        // ─── Real-Time Pusher Listener ──────────────────────────────────────
+        if (window.Echo) {
+            window.Echo.channel('keuangan-channel')
+                .listen('KeuanganUpdated', (e) => {
+                    console.log('Real-time event received on dashboard:', e);
+                    loadDashboard();
+                });
+                
+            window.Echo.channel('anak-channel')
+                .listen('AnakUpdated', (e) => {
+                    console.log('Real-time event received on dashboard (Anak):', e);
+                    loadDashboard();
+                });
+                
+            window.Echo.channel('inventaris-channel')
+                .listen('InventarisUpdated', (e) => {
+                    console.log('Real-time event received on dashboard (Inventaris):', e);
+                    loadDashboard();
+                });
+                
+            window.Echo.channel('kunjungan-channel')
+                .listen('KunjunganUpdated', (e) => {
+                    console.log('Real-time event received on dashboard (Kunjungan):', e);
+                    loadDashboard();
+                });
+        }
+        // ──────────────────────────────────────────────────────────────────
+    });
 </script>
 @endpush
 @endsection

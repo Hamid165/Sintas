@@ -25,6 +25,7 @@ class AnakController extends Controller
         ]);
 
         $anak = Anak::create($validated);
+        broadcast(new \App\Events\AnakUpdated($anak, 'create'));
         return response()->json($anak, 201);
     }
 
@@ -38,6 +39,7 @@ class AnakController extends Controller
     {
         $anak = Anak::findOrFail($id);
         $anak->update($request->all());
+        broadcast(new \App\Events\AnakUpdated($anak, 'update'));
         return response()->json($anak);
     }
 
@@ -45,6 +47,7 @@ class AnakController extends Controller
     {
         $anak = Anak::findOrFail($id);
         $anak->delete();
+        broadcast(new \App\Events\AnakUpdated($anak, 'delete'));
         return response()->json(['message' => 'Data berhasil dihapus']);
     }
 }

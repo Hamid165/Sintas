@@ -111,6 +111,23 @@
             document.getElementById('statBarang').innerText = filteredData.length;
             renderPage(1);
         });
+
+        // ─── Real-Time Pusher Listener ──────────────────────────────────────
+        if (window.Echo) {
+            window.Echo.channel('inventaris-channel')
+                .listen('InventarisUpdated', (e) => {
+                    console.log('Real-time event received (Inventaris):', e);
+                    if (e.tipe_aksi === 'create') {
+                        showToast('Ada data inventaris baru masuk', 'info');
+                    } else if (e.tipe_aksi === 'update') {
+                        showToast('Data inventaris telah diperbarui', 'warning');
+                    } else {
+                        showToast('Data inventaris telah dihapus', 'error');
+                    }
+                    loadInventori();
+                });
+        }
+        // ──────────────────────────────────────────────────────────────────
     });
 
     async function loadInventori() {

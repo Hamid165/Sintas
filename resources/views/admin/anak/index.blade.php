@@ -105,6 +105,23 @@
             document.getElementById('statTotalAnak').innerText = filteredData.length;
             renderPage(1);
         });
+
+        // ─── Real-Time Pusher Listener ──────────────────────────────────────
+        if (window.Echo) {
+            window.Echo.channel('anak-channel')
+                .listen('AnakUpdated', (e) => {
+                    console.log('Real-time event received (Anak):', e);
+                    if (e.tipe_aksi === 'create') {
+                        showToast('Ada data anak baru masuk', 'info');
+                    } else if (e.tipe_aksi === 'update') {
+                        showToast('Data anak telah diperbarui', 'warning');
+                    } else {
+                        showToast('Data anak telah dihapus', 'error');
+                    }
+                    loadData();
+                });
+        }
+        // ──────────────────────────────────────────────────────────────────
     });
 
     async function loadData() {

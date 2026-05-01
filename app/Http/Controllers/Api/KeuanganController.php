@@ -23,6 +23,7 @@ class KeuanganController extends Controller
         ]);
 
         $keuangan = Keuangan::create($validated);
+        broadcast(new \App\Events\KeuanganUpdated($keuangan, 'create'));
         return response()->json($keuangan, 201);
     }
 
@@ -36,6 +37,7 @@ class KeuanganController extends Controller
     {
         $keuangan = Keuangan::findOrFail($id);
         $keuangan->update($request->all());
+        broadcast(new \App\Events\KeuanganUpdated($keuangan, 'update'));
         return response()->json($keuangan);
     }
 
@@ -43,6 +45,7 @@ class KeuanganController extends Controller
     {
         $keuangan = Keuangan::findOrFail($id);
         $keuangan->delete();
+        broadcast(new \App\Events\KeuanganUpdated($keuangan, 'delete'));
         return response()->json(['message' => 'Data berhasil dihapus']);
     }
 }

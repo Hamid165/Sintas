@@ -93,6 +93,23 @@
             document.getElementById('statArtikel').innerText = filteredData.length;
             renderPage(1);
         });
+
+        // ─── Real-Time Pusher Listener ──────────────────────────────────────
+        if (window.Echo) {
+            window.Echo.channel('kunjungan-channel')
+                .listen('KunjunganUpdated', (e) => {
+                    console.log('Real-time event received (Kunjungan):', e);
+                    if (e.tipe_aksi === 'create') {
+                        showToast('Ada data kunjungan tamu baru masuk', 'info');
+                    } else if (e.tipe_aksi === 'update') {
+                        showToast('Data kunjungan telah diperbarui', 'warning');
+                    } else {
+                        showToast('Data kunjungan telah dihapus', 'error');
+                    }
+                    loadArtikel();
+                });
+        }
+        // ──────────────────────────────────────────────────────────────────
     });
 
     async function loadArtikel() {
