@@ -157,8 +157,10 @@ async function loadDashboard() {
                     <div class="px-6 py-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
                         <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0
                             ${t.jenis_transaksi === 'Pemasukan' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                ${t.jenis_transaksi === 'Pemasukan' ? '<path d="m18 15-6-6-6 6"/>' : '<path d="m6 9 6 6 6-6"/>'}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                ${t.jenis_transaksi === 'Pemasukan' 
+                                    ? '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline>' 
+                                    : '<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline>'}
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
