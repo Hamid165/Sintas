@@ -127,8 +127,10 @@
                             Audit
                         @elseif(request()->routeIs('admin.profil'))
                             Profil Admin
-                        @elseif(request()->routeIs('admin.struktur'))
+                        @elseif(request()->routeIs('admin.struktur*'))
                             Struktur
+                        @elseif(request()->routeIs('admin.role.*'))
+                            Hak Akses (RBAC)
                         @else
                             CareHub
                         @endif

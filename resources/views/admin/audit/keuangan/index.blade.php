@@ -396,6 +396,7 @@ function fmtRupiah(n) {
 
 async function exportAuditPdf() {
     const rows = await fetchAllAuditKeuangan();
+    if (rows.length === 0) { showToast('Tidak ada data audit keuangan yang bisa diekspor.', 'warning'); return; }
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
     const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
@@ -414,10 +415,12 @@ async function exportAuditPdf() {
         ]),
         filename: `audit_keuangan_${now.toISOString().slice(0,19).replace(/[:T]/g,'-')}.pdf`,
     });
+    showToast('File PDF sedang diunduh...', 'success');
 }
 
 async function exportAuditExcel() {
     const rows = await fetchAllAuditKeuangan();
+    if (rows.length === 0) { showToast('Tidak ada data audit keuangan yang bisa diekspor.', 'warning'); return; }
     const now = new Date();
     buildExcel({
         title: 'Laporan Audit Keuangan',
@@ -434,10 +437,12 @@ async function exportAuditExcel() {
         ]),
         filename: `audit_keuangan_${now.toISOString().slice(0,10)}.xlsx`,
     });
+    showToast('File Excel sedang diunduh...', 'success');
 }
 
 async function exportAuditCsv() {
     const rows = await fetchAllAuditKeuangan();
+    if (rows.length === 0) { showToast('Tidak ada data audit keuangan yang bisa diekspor.', 'warning'); return; }
     buildCsv(
         ['No','Tanggal','Jenis Audit','Kode Dokumen','Keterangan','Nominal (Rp)','Jenis Transaksi'],
         rows.map((r,i) => [
@@ -451,6 +456,7 @@ async function exportAuditCsv() {
         ]),
         `audit_keuangan_${new Date().toISOString().slice(0,10)}.csv`
     );
+    showToast('File CSV sedang diunduh...', 'success');
 }
 
 
