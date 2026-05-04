@@ -109,7 +109,12 @@ Ikuti instruksi di bawah untuk menjalankan CareHub di komputer kamu (Laragon / X
 ### 2. Autentikasi & Otorisasi
 
 - **Laravel Sanctum:** Digunakan untuk autentikasi dan manajemen *API Token* secara aman. Cocok untuk arsitektur SPA dan disiapkan untuk integrasi mobile (CareHub Mobile) ke depannya.
-- **Spatie Laravel Permission:** Library andalan untuk mengatur *Role-Based Access Control* (RBAC). Digunakan untuk memberikan hak akses spesifik ke role seperti Admin, Bendahara, dan Sekretariat.
+- **Spatie Laravel Permission (`spatie/laravel-permission`):** Library utama untuk mengatur *Role-Based Access Control* (RBAC) secara penuh. Digunakan untuk:
+  - Mendefinisikan *Permission* per aksi (contoh: `view_anak`, `create_anak`, `delete_keuangan`).
+  - Meng-assign *Role* ke user (`admin`, `bendahara`, `sekretariat`, `karyawan`).
+  - Mengontrol visibilitas menu sidebar via `@can()` di Blade.
+  - Mengontrol akses rute web via middleware `permission:view_xxx`.
+  - Mengontrol akses API CRUD via middleware `permission:create_xxx` / `delete_xxx`.
 
 ### 3. Arsitektur Real-Time (WebSockets)
 
@@ -143,7 +148,14 @@ Agar semua klien melihat pembaruan data secara bersamaan tanpa me-refresh halama
 ### 1. Modul Autentikasi & Otorisasi 
 
 - **Login:** Autentikasi dibuat manual menggunakan validasi *Auth::attempt* dan Session/Token API bawaan Laravel (tidak menggunakan Laravel Breeze/Jetstream agar UI lebih fleksibel).
-- **Role-Based Access Control (RBAC):** Akses menu dibatasi berdasarkan *Role* (Admin, Bendahara, Sekretariat, Karyawan) melalui *Middleware* Laravel dan integrasi dengan `spatie/laravel-permission`.
+- **Role-Based Access Control (RBAC) — Full Integration:**
+  - Admin dapat mengatur permission per-role melalui panel **Hak Akses (RBAC)** secara dinamis.
+  - Perubahan permission **langsung berlaku** tanpa restart server (permission cache di-flush otomatis via `forgetCachedPermissions()` setelah setiap update).
+  - **Sidebar menu** muncul/hilang otomatis berdasarkan `@can('view_xxx')` dari Spatie.
+  - **Tombol CRUD** (Tambah/Edit/Hapus) di setiap halaman dikontrol via `window.__can()` — variabel permission di-inject dari server ke JavaScript saat halaman dimuat.
+  - **Route Web** dilindungi middleware `permission:view_xxx` / `permission:create_xxx`.
+  - **API Endpoint** CRUD dilindungi middleware `permission:create/edit/delete_xxx` sehingga mutasi data dari luar pun ikut terkontrol.
+  - Middleware `role` dan `permission` menggunakan **Spatie's official middleware** (`RoleMiddleware`, `PermissionMiddleware`) yang dikonfigurasi di `bootstrap/app.php`.
 - **Lupa Password:** Sistem OTP (One Time Password) sederhana yang dikirim/divalidasi manual melalui API endpoint tanpa library tambahan yang rumit.
 
 ### 2. Modul Manajemen Anak Asuh (Real-time)
@@ -184,10 +196,14 @@ Agar semua klien melihat pembaruan data secara bersamaan tanpa me-refresh halama
 - Modul pendataan kepengurusan panti asuhan, mencakup data relawan, staf, pengasuh, dan jabatan masing-masing dalam struktur organisasi.
 
 ### 9. Hak Akses (RBAC & Manajemen Role)
-- Pembatasan rute halaman dan fungsionalitas (contoh: *Bendahara* tidak bisa menghapus data anak) melalui integrasi mendalam dengan *Spatie Permission*.
+- Panel RBAC khusus Admin untuk mengatur permission setiap role secara dinamis (toggle ON/OFF per menu & aksi CRUD).
+- Perubahan permission berlaku **real-time** — cache Spatie otomatis di-flush setelah setiap penyimpanan.
+- Integrasi penuh dari **sidebar → route → API**: role yang diberi akses akan langsung mendapat menu, bisa mengakses halaman, dan bisa melakukan operasi CRUD sesuai permission yang diberikan.
+- Permission yang tersedia: `view`, `create`, `edit`, `delete` untuk setiap modul: `anak`, `keuangan`, `kunjungan`, `inventori`, `surat`, `audit`, `sdm`.
 
 ### 10. Profil Pengguna
-- Manajemen profil admin dan pengguna untuk mengganti identitas dan password/keamanan akun.
+- Halaman profil **dinamis** — menampilkan nama role sesuai pengguna yang sedang login (Admin, Bendahara, Sekretariat, Karyawan).
+- Mendukung ganti nama, email, foto profil, dan password.
 
 ---
 
@@ -248,14 +264,19 @@ sintas-app-panti-asuhan/
 │   ├── css/
 │   │   └── app.css                    # Styling utama Tailwind CSS v4
 │   └── views/
+│       ├── layouts/
+│       │   └── admin.blade.php        # Layout utama (sidebar @can, window.__perms JS injection)
 │       └── admin/                     # Tampilan halaman utama per modul
 │           ├── anak/index.blade.php
 │           ├── audit/index.blade.php
 │           ├── inventori/index.blade.php
 │           ├── keuangan/index.blade.php
-│           └── kunjungan/index.blade.php
+│           ├── kunjungan/index.blade.php
+│           ├── profil.blade.php       # Profil dinamis (role dari Auth::user()->role)
+│           └── sdm/role.blade.php     # Panel RBAC Admin
 └── routes/
-    └── web.php                        # Daftar routing halaman web & Middleware
+    ├── web.php                        # Routing halaman + middleware permission:view/create_xxx
+    └── api.php                        # API endpoint + middleware permission:create/edit/delete_xxx
 ```
 
 ### 3. Struktur Real-Time (Pusher & WebSocket)

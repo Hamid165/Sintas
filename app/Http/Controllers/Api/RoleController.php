@@ -35,6 +35,9 @@ class RoleController extends Controller
         $permissions = $request->input('permissions', []);
         $role->syncPermissions($permissions);
 
+        // Flush Spatie permission cache agar perubahan langsung berlaku
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
         return response()->json(['message' => 'Hak akses untuk role ' . $role->name . ' berhasil diperbarui!']);
     }
 }

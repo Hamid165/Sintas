@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Profil Admin - CareHub')
+@section('title', 'Profil ' . ucfirst(Auth::user()->role) . ' - CareHub')
 
 @section('content')
 <div class="space-y-6 w-full">
@@ -11,13 +11,13 @@
                 <i data-lucide="user-circle-2" size="32"></i>
             </div>
             <div>
-                <h2 class="text-2xl font-black uppercase tracking-tighter">Profil Admin</h2>
+                <h2 class="text-2xl font-black uppercase tracking-tighter">Profil {{ ucfirst(Auth::user()->role) }}</h2>
                 <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">Informasi Akun & Keamanan</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
             <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">Role</p>
-            <p class="text-white font-black text-sm mt-1">Super Admin</p>
+            <p class="text-white font-black text-sm mt-1 capitalize">{{ Auth::user()->role }}</p>
         </div>
     </div>
 
@@ -52,7 +52,7 @@
                 </div>
                 <div class="flex justify-between items-center border-b border-gray-50 pb-3">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</span>
-                    <span class="bg-blue-50 text-blue-700 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">Super Admin</span>
+                    <span id="roleBadge" class="bg-blue-50 text-blue-700 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">{{ Auth::user()->role }}</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-gray-50 pb-3">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status Akun</span>
@@ -76,7 +76,7 @@
                     </div>
                     <div>
                         <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs">Edit Informasi Akun</h4>
-                        <p class="text-[10px] text-gray-400 font-bold">Ubah nama dan email admin</p>
+                        <p class="text-[10px] text-gray-400 font-bold">Ubah nama dan email</p>
                     </div>
                 </div>
 
@@ -203,10 +203,16 @@
             if(res.ok) {
                 const user = await res.json();
                 document.getElementById('namaDisplay').innerText = user.name || 'Administrator';
-                document.getElementById('emailDisplay').innerText = user.email || 'admin@carehub.id';
+                document.getElementById('emailDisplay').innerText = user.email || '-';
                 document.getElementById('inputNama').value = user.name || '';
                 document.getElementById('inputEmail').value = user.email || '';
-                
+
+                // Update role badge dari data user
+                const roleBadge = document.getElementById('roleBadge');
+                if (roleBadge && user.role) {
+                    roleBadge.innerText = user.role;
+                }
+
                 // Update avatar
                 if (user.foto) {
                     const photoUrl = `/storage/${user.foto}`;
@@ -218,7 +224,7 @@
                     const dicebear = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
                     document.getElementById('avatarImg').src = dicebear;
                 }
-                
+
                 localStorage.setItem('user_name', user.name);
                 localStorage.setItem('user_email', user.email);
             }

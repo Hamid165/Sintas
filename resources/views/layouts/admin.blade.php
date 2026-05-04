@@ -13,7 +13,7 @@
     <!-- jsPDF for PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -27,7 +27,7 @@
 <body class="bg-[#F8FAFC] text-slate-800 selection:bg-blue-100">
 
     <div class="flex h-screen overflow-hidden relative">
-        
+
         <!-- Mobile Sidebar Overlay (opsional supaya background tertutup) -->
         <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
 
@@ -40,51 +40,51 @@
             </div>
 
             <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto scrollbar-hide">
-                <a href="{{ route('admin.dashboard') }}" 
+                <a href="{{ route('admin.dashboard') }}"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="layout-dashboard" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Dashboard</span>
                 </a>
-                
-                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat')
-                <a href="{{ route('admin.anak') }}" 
+
+                @can('view_anak')
+                <a href="{{ route('admin.anak') }}"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.anak*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="users" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Manajemen Anak</span>
                 </a>
-                @endif
+                @endcan
 
-                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'bendahara')
-                <a href="{{ route('admin.keuangan') }}" 
+                @can('view_keuangan')
+                <a href="{{ route('admin.keuangan') }}"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.keuangan*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="wallet" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Keuangan</span>
                 </a>
-                @endif
+                @endcan
 
-                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'karyawan')
-                <a href="{{ route('admin.inventori') }}" 
+                @can('view_inventori')
+                <a href="{{ route('admin.inventori') }}"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.inventoris*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="package" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Inventaris</span>
                 </a>
-                @endif
+                @endcan
 
-                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat')
-                <a href="{{ route('admin.kunjungan') }}" 
+                @can('view_kunjungan')
+                <a href="{{ route('admin.kunjungan') }}"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.kunjungan*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="users-round" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Kunjungan Tamu</span>
                 </a>
-                @endif
+                @endcan
 
-                @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat' || Auth::user()->role == 'bendahara')
-                <a href="{{ route('admin.audit') }}" 
+                @can('view_audit')
+                <a href="{{ route('admin.audit') }}"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.audit*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="shield-check" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Audit</span>
                 </a>
-                @endif
+                @endcan
 
                 @if(Auth::user()->role == 'admin')
                     <a href="{{ route('admin.struktur') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.struktur') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
@@ -136,7 +136,7 @@
                         @endif
                     </h2>
                 </div>
-                
+
                 <div class="flex items-center gap-4">
                     <i data-lucide="bell" size="20" class="text-gray-300 cursor-pointer hover:text-blue-500 transition-colors"></i>
                     {{-- Avatar yang bisa diklik ke profil --}}
@@ -155,6 +155,12 @@
     </div>
 
     <script>
+        // ─── User Permissions (dari Spatie RBAC) ──────────────────────────────────
+        window.__perms = @json(Auth::user()->getAllPermissions()->pluck('name'));
+        // Helper: cek apakah user punya permission tertentu
+        window.__can = (perm) => window.__perms.includes(perm);
+        // ─────────────────────────────────────────────────────────────────────────
+
         lucide.createIcons();
 
         // ─── Global Toast System ───────────────────────────────────────────────
@@ -246,8 +252,8 @@
             const token = localStorage.getItem('auth_token');
             if(token) {
                 try {
-                    const res = await fetch('/api/user', { 
-                        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' } 
+                    const res = await fetch('/api/user', {
+                        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
                     });
                     if(res.ok) {
                         const user = await res.json();
@@ -268,10 +274,10 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
+
             // Toggle sidebar
             sidebar.classList.toggle('-translate-x-full');
-            
+
             // Toggle overlay for mobile
             if (window.innerWidth < 1024) {
                 if (sidebar.classList.contains('-translate-x-full')) {
@@ -295,19 +301,19 @@
             const token = localStorage.getItem('auth_token');
             if(token) {
                 try {
-                    await fetch('/api/logout', { 
-                        method: 'POST', 
-                        headers: { 
+                    await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: {
                             'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json' 
-                        } 
+                            'Accept': 'application/json'
+                        }
                     });
                 } catch(e) { console.error(e); }
             }
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user_name');
             localStorage.removeItem('user_email');
-            
+
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '{{ route("logout") }}';

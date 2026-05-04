@@ -18,9 +18,11 @@
                 <button onclick="openExportKunjungan()" class="flex-1 sm:flex-none justify-center bg-emerald-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="file-spreadsheet" size="16"></i> Export
                 </button>
+                @can('create_kunjungan')
                 <a href="{{ route('admin.kunjungan.tambah') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="plus" size="16"></i> Tambah
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -169,13 +171,10 @@
                 </div>
                 
                 <div class="p-6 pt-0 shrink-0">
-                    <div class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
-                        <a href="/admin/kunjungan/tambah?id=${a.id}" class="py-3 rounded-xl bg-blue-50 text-blue-600 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white transition-all">
-                            Edit Data
-                        </a>
-                        <button onclick="hapusArtikel(${a.id})" class="py-3 rounded-xl bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-rose-600 hover:text-white transition-all">
-                            Hapus Data
-                        </button>
+                    <div class="flex gap-3 pt-4 border-t border-gray-100">
+                        ${window.__can('edit_kunjungan') ? `<a href="/admin/kunjungan/tambah?id=${a.id}" class="flex-1 py-3 rounded-xl bg-blue-50 text-blue-600 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white transition-all">Edit Data</a>` : ''}
+                        ${window.__can('delete_kunjungan') ? `<button onclick="hapusArtikel(${a.id})" class="flex-1 py-3 rounded-xl bg-rose-50 text-rose-600 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-rose-600 hover:text-white transition-all">Hapus Data</button>` : ''}
+                        ${!window.__can('edit_kunjungan') && !window.__can('delete_kunjungan') ? `<span class="w-full text-center text-[10px] text-gray-300 font-black uppercase py-3">Read Only</span>` : ''}
                     </div>
                 </div>
             </div>`;

@@ -26,10 +26,26 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard Stats
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // API CRUD Lengkap
-    Route::apiResource('anak', AnakController::class);
-    Route::apiResource('inventaris', InventarisController::class);
-    Route::apiResource('keuangan', KeuanganController::class);
+    // ── Anak ──────────────────────────────────────────────────────────────────
+    Route::get('/anak', [AnakController::class, 'index']);        // view_anak
+    Route::middleware('permission:create_anak')->post('/anak', [AnakController::class, 'store']);
+    Route::middleware('permission:view_anak')->get('/anak/{anak}', [AnakController::class, 'show']);
+    Route::middleware('permission:edit_anak')->put('/anak/{anak}', [AnakController::class, 'update']);
+    Route::middleware('permission:delete_anak')->delete('/anak/{anak}', [AnakController::class, 'destroy']);
+
+    // ── Inventaris ────────────────────────────────────────────────────────────
+    Route::get('/inventaris', [InventarisController::class, 'index']);
+    Route::middleware('permission:create_inventori')->post('/inventaris', [InventarisController::class, 'store']);
+    Route::middleware('permission:view_inventori')->get('/inventaris/{inventaris}', [InventarisController::class, 'show']);
+    Route::middleware('permission:edit_inventori')->put('/inventaris/{inventaris}', [InventarisController::class, 'update']);
+    Route::middleware('permission:delete_inventori')->delete('/inventaris/{inventaris}', [InventarisController::class, 'destroy']);
+
+    // ── Keuangan ──────────────────────────────────────────────────────────────
+    Route::get('/keuangan', [KeuanganController::class, 'index']);
+    Route::middleware('permission:create_keuangan')->post('/keuangan', [KeuanganController::class, 'store']);
+    Route::middleware('permission:view_keuangan')->get('/keuangan/{keuangan}', [KeuanganController::class, 'show']);
+    Route::middleware('permission:edit_keuangan')->put('/keuangan/{keuangan}', [KeuanganController::class, 'update']);
+    Route::middleware('permission:delete_keuangan')->delete('/keuangan/{keuangan}', [KeuanganController::class, 'destroy']);
     
     // Artikel sisa CRUD (Store, Update, Destroy)
     Route::post('/artikel', [ArtikelController::class, 'store']);
@@ -116,16 +132,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/export/audit-keuangan-excel', 'auditKeuanganExcel');
     });
 
-    // Kunjungan
-    Route::controller(\App\Http\Controllers\Api\KunjunganTamuController::class)->group(function () {
-        Route::get('/kunjungan-tamu', 'index');
-        Route::post('/kunjungan-tamu', 'store');
-        Route::post('/kunjungan-tamu/generate-ai', 'generateAiDescription');
-        Route::get('/kunjungan-tamu/surat-options', 'getSuratOptions');
-        Route::get('/kunjungan-tamu/{id}', 'show');
-        Route::post('/kunjungan-tamu/{id}', 'update');
-        Route::delete('/kunjungan-tamu/{id}', 'destroy');
-    });
+    // ── Kunjungan Tamu ────────────────────────────────────────────────────────
+    Route::get('/kunjungan-tamu', [\App\Http\Controllers\Api\KunjunganTamuController::class, 'index']);
+    Route::get('/kunjungan-tamu/surat-options', [\App\Http\Controllers\Api\KunjunganTamuController::class, 'getSuratOptions']);
+    Route::get('/kunjungan-tamu/{id}', [\App\Http\Controllers\Api\KunjunganTamuController::class, 'show']);
+    Route::middleware('permission:create_kunjungan')->post('/kunjungan-tamu', [\App\Http\Controllers\Api\KunjunganTamuController::class, 'store']);
+    Route::middleware('permission:create_kunjungan')->post('/kunjungan-tamu/generate-ai', [\App\Http\Controllers\Api\KunjunganTamuController::class, 'generateAiDescription']);
+    Route::middleware('permission:edit_kunjungan')->post('/kunjungan-tamu/{id}', [\App\Http\Controllers\Api\KunjunganTamuController::class, 'update']);
+    Route::middleware('permission:delete_kunjungan')->delete('/kunjungan-tamu/{id}', [\App\Http\Controllers\Api\KunjunganTamuController::class, 'destroy']);
     // SDM / User Management
     Route::controller(\App\Http\Controllers\Api\SdmController::class)->group(function () {
         Route::get('/sdm', 'index');

@@ -18,9 +18,11 @@
                 <button onclick="openExportKeuangan()" class="flex-1 sm:flex-none justify-center bg-emerald-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="file-spreadsheet" size="16"></i> Export
                 </button>
+                @can('create_keuangan')
                 <a href="{{ route('admin.keuangan.tambah') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="plus" size="16"></i> Tambah
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -306,9 +308,9 @@
                     ${t.jenis_transaksi === 'Pemasukan' ? '+' : '-'} ${formatRp(nominal)}
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <button onclick="hapusKeuangan(${t.id})" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-400 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center mx-auto">
-                        <i data-lucide="trash-2" size="14"></i>
-                    </button>
+                    <div class="flex justify-center gap-2">
+                        ${window.__can('delete_keuangan') ? `<button onclick="hapusKeuangan(${t.id})" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-400 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center mx-auto" title="Hapus"><i data-lucide="trash-2" size="14"></i></button>` : `<span class="text-[10px] text-gray-300 font-black uppercase">Read Only</span>`}
+                    </div>
                 </td>
             </tr>`;
         }).join('');

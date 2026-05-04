@@ -26,8 +26,8 @@ Route::get('/', fn() => redirect()->route('admin.dashboard'));
 
 // Admin panel - List pages
 Route::middleware(['auth'])->prefix('admin')->group(function () {
-    
-    // Global Access
+
+    // Global Access (semua role yang sudah login)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/profil', fn() => view('admin.profil'))->name('admin.profil');
     Route::get('/struktur-organisasi', [DashboardController::class, 'strukturOrganisasi'])->name('admin.struktur');
@@ -39,42 +39,52 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::delete('/struktur/hapus/{id}', [DashboardController::class, 'hapusStaf'])->name('admin.struktur.hapus');
     });
 
-    // Manajemen Hak Akses (Role & Permission)
+    // Manajemen Hak Akses (Role & Permission) - Admin Only
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/roles', fn() => view('admin.sdm.role'))->name('admin.role.index');
     });
 
-    // Admin & Sekretariat
-    Route::middleware(['role:admin,sekretariat'])->group(function () {
+    // Manajemen Anak
+    Route::middleware(['permission:view_anak'])->group(function () {
         Route::get('/anak', fn() => view('admin.anak.index'))->name('admin.anak');
+    });
+    Route::middleware(['permission:create_anak'])->group(function () {
         Route::get('/anak/tambah', fn() => view('admin.anak.form'))->name('admin.anak.tambah');
+    });
+
+    // Kunjungan Tamu
+    Route::middleware(['permission:view_kunjungan'])->group(function () {
         Route::get('/kunjungan', fn() => view('admin.kunjungan.index'))->name('admin.kunjungan');
+    });
+    Route::middleware(['permission:create_kunjungan'])->group(function () {
         Route::get('/kunjungan/tambah', fn() => view('admin.kunjungan.form'))->name('admin.kunjungan.tambah');
     });
 
-    // Admin & Bendahara
-    Route::middleware(['role:admin,bendahara'])->group(function () {
+    // Keuangan
+    Route::middleware(['permission:view_keuangan'])->group(function () {
         Route::get('/keuangan', fn() => view('admin.keuangan.index'))->name('admin.keuangan');
+    });
+    Route::middleware(['permission:create_keuangan'])->group(function () {
         Route::get('/keuangan/tambah', fn() => view('admin.keuangan.form'))->name('admin.keuangan.tambah');
     });
 
     // Inventaris
-    Route::middleware(['role:admin,karyawan'])->group(function () {
+    Route::middleware(['permission:view_inventori'])->group(function () {
         Route::get('/inventori', fn() => view('admin.inventori.index'))->name('admin.inventori');
+    });
+    Route::middleware(['permission:create_inventori'])->group(function () {
         Route::get('/inventori/tambah', fn() => view('admin.inventori.form'))->name('admin.inventori.tambah');
     });
 
-    // Audit Menu
-    Route::middleware(['role:admin,sekretariat,bendahara'])->group(function () {
+    // Audit Menu - berdasarkan permission Spatie
+    Route::middleware(['permission:view_audit'])->group(function () {
         Route::get('/audit', fn() => view('admin.audit.index'))->name('admin.audit');
-    });
-
-    Route::middleware(['role:admin,bendahara'])->group(function () {
         Route::get('/audit/keuangan', [AuditKeuanganController::class, 'index'])->name('admin.audit.keuangan');
         Route::get('/audit/keuangan/tambah', [AuditKeuanganController::class, 'create'])->name('admin.audit.keuangan.tambah');
     });
 
-    Route::middleware(['role:admin,sekretariat'])->group(function () {
+    // Audit Sekretariat - berdasarkan permission Spatie (view_surat)
+    Route::middleware(['permission:view_surat'])->group(function () {
         Route::get('/audit/sekretariat', fn() => view('admin.audit.sekretariat.index'))->name('admin.audit.sekretariat');
         Route::get('/audit/sekretariat/tambah-masuk', fn() => view('admin.audit.sekretariat.tambah-masuk'))->name('admin.audit.sekretariat.tambah-masuk');
         Route::get('/audit/sekretariat/tambah-keluar', fn() => view('admin.audit.sekretariat.tambah-keluar'))->name('admin.audit.sekretariat.tambah-keluar');

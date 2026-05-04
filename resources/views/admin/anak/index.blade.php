@@ -19,9 +19,11 @@
                 <button onclick="openExportAnak()" class="flex-1 sm:flex-none justify-center bg-emerald-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="file-spreadsheet" size="16"></i> Export
                 </button>
+                @can('create_anak')
                 <a href="{{ route('admin.anak.tambah') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-6 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="plus" size="16"></i> Tambah
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -263,12 +265,9 @@
                 <td class="px-6 py-4 text-xs font-bold text-gray-800">${c.info_pendidikan || '-'}</td>
                 <td class="px-6 py-4">
                     <div class="flex justify-center gap-2">
-                        <a href="/admin/anak/tambah?id=${c.id}" class="w-9 h-9 rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center" title="Edit">
-                            <i data-lucide="edit-3" size="14"></i>
-                        </a>
-                        <button onclick="hapusAnak(${c.id})" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-400 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center" title="Hapus">
-                            <i data-lucide="trash-2" size="14"></i>
-                        </button>
+                        ${window.__can('edit_anak') ? `<a href="/admin/anak/tambah?id=${c.id}" class="w-9 h-9 rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center" title="Edit"><i data-lucide="edit-3" size="14"></i></a>` : ''}
+                        ${window.__can('delete_anak') ? `<button onclick="hapusAnak(${c.id})" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-400 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center" title="Hapus"><i data-lucide="trash-2" size="14"></i></button>` : ''}
+                        ${!window.__can('edit_anak') && !window.__can('delete_anak') ? `<span class="text-[10px] text-gray-300 font-black uppercase">Read Only</span>` : ''}
                     </div>
                 </td>
             </tr>
