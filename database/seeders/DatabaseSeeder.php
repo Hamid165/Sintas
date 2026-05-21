@@ -59,5 +59,10 @@ class DatabaseSeeder extends Seeder
             'nama' => 'Panti Asuhan CareHub',
             'foto_profil' => null,
         ]);
+
+        // 6. Jalankan seeder role & permission agar role admin mendapat semua akses menu
+        $this->call([
+            RolePermissionSeeder::class,
+        ]);
     }
 }
