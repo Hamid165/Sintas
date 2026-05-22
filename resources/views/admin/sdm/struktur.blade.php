@@ -95,7 +95,8 @@
             const rolesHtml = (u.spatie_roles || []).map(r => {
                 const colorClass = r === 'admin' ? 'bg-emerald-100 text-emerald-700' 
                                 : (r === 'sekretariat' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700');
-                return `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${colorClass}">${r}</span>`;
+                const displayR = r === 'admin' ? 'Kepala Panti' : r;
+                return `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${colorClass}">${displayR}</span>`;
             }).join(' ');
 
             let passwordHtml = '<span class="text-gray-400 font-medium italic">Rahasia</span>';

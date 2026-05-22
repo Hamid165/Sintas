@@ -11,13 +11,13 @@
                 <i data-lucide="user-circle-2" size="32"></i>
             </div>
             <div>
-                <h2 class="text-2xl font-black uppercase tracking-tighter">Profil {{ ucfirst(Auth::user()->role) }}</h2>
+                <h2 class="text-2xl font-black uppercase tracking-tighter">Profil {{ Auth::user()->role == 'admin' ? 'Kepala Panti' : ucfirst(Auth::user()->role) }}</h2>
                 <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-1">Informasi Akun & Keamanan</p>
             </div>
         </div>
         <div class="text-right hidden md:block">
             <p class="text-blue-100 text-[10px] uppercase font-black tracking-widest">Role</p>
-            <p class="text-white font-black text-sm mt-1 capitalize">{{ Auth::user()->role }}</p>
+            <p class="text-white font-black text-sm mt-1 capitalize">{{ Auth::user()->role == 'admin' ? 'Kepala Panti' : Auth::user()->role }}</p>
         </div>
     </div>
 
@@ -52,7 +52,7 @@
                 </div>
                 <div class="flex justify-between items-center border-b border-gray-50 pb-3">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</span>
-                    <span id="roleBadge" class="bg-blue-50 text-blue-700 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">{{ Auth::user()->role }}</span>
+                    <span id="roleBadge" class="bg-blue-50 text-blue-700 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">{{ Auth::user()->role == 'admin' ? 'Kepala Panti' : Auth::user()->role }}</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-gray-50 pb-3">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status Akun</span>
@@ -210,7 +210,7 @@
                 // Update role badge dari data user
                 const roleBadge = document.getElementById('roleBadge');
                 if (roleBadge && user.role) {
-                    roleBadge.innerText = user.role;
+                    roleBadge.innerText = user.role === 'admin' ? 'Kepala Panti' : user.role;
                 }
 
                 // Update avatar
