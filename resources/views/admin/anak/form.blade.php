@@ -64,8 +64,16 @@
             <div class="grid grid-cols-1 gap-6">
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Pendidikan / Sekolah</label>
-                    <input type="text" id="info_pendidikan" placeholder="SD Negeri 1 Purwokerto..."
-                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm">
+                    <select id="info_pendidikan"
+                        class="w-full p-4 bg-gray-50 border-0 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm appearance-none cursor-pointer">
+                        <option value="Belum Sekolah">Belum Sekolah</option>
+                        <option value="TK">TK</option>
+                        <option value="SD">SD</option>
+                        <option value="SMP">SMP</option>
+                        <option value="SMA">SMA</option>
+                        <option value="Perguruan Tinggi">Perguruan Tinggi</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                 </div>
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Riwayat Kesehatan</label>
@@ -118,7 +126,22 @@
                 document.getElementById('usia').value = data.usia || '';
                 document.getElementById('jenis_kelamin').value = data.jenis_kelamin || 'Laki-laki';
                 document.getElementById('tempat_tgl_lahir').value = data.tempat_tgl_lahir || '';
-                document.getElementById('info_pendidikan').value = data.info_pendidikan || '';
+                
+                const selPendidikan = document.getElementById('info_pendidikan');
+                const valPendidikan = data.info_pendidikan || 'Belum Sekolah';
+                let exists = false;
+                for (let i = 0; i < selPendidikan.options.length; i++) {
+                    if (selPendidikan.options[i].value === valPendidikan) {
+                        exists = true; break;
+                    }
+                }
+                if (!exists && valPendidikan.trim() !== '') {
+                    const opt = document.createElement('option');
+                    opt.value = valPendidikan;
+                    opt.innerHTML = valPendidikan;
+                    selPendidikan.appendChild(opt);
+                }
+                selPendidikan.value = valPendidikan;
                 document.getElementById('riwayat_kesehatan').value = data.riwayat_kesehatan || '';
             } catch(e) { console.error(e); }
         }

@@ -34,7 +34,6 @@
                 <a href="{{ route('admin.audit.sekretariat.tambah-keluar') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-5 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="plus" size="16"></i> Surat Keluar
                 </a>
-                @endcan
             </div>
         </div>
     </div>
