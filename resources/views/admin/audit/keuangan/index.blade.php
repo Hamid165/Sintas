@@ -270,9 +270,9 @@ async function loadAuditKeuangan(page = 1) {
                 <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 font-black text-[10px] uppercase">TERAUDIT</span></td>
                 <td class="px-6 py-4">
                     <div class="flex items-center justify-center gap-2">
-                        <button onclick="deleteAudit(${item.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                        ${window.__can('delete_audit') ? `<button onclick="deleteAudit(${item.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
                             <i data-lucide="trash-2" size="14"></i>
-                        </button>
+                        </button>` : `<span class="text-[10px] text-gray-300 font-black uppercase">Read Only</span>`}
                     </div>
                 </td>
             `;

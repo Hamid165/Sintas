@@ -179,15 +179,21 @@
         const confirmed = await showConfirm(`Hapus ${nama} secara permanen?`);
         if (confirmed) {
             try {
+                const fd = new FormData();
+                fd.append('_method', 'DELETE');
+
                 const res = await fetch(`/api/sdm/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+                    body: fd
                 });
                 if (res.ok) {
                     showToast(`${nama} berhasil dihapus dari struktur.`, 'success');
                     fetchSdmData();
                 } else {
-                    showToast('Gagal menghapus anggota.', 'error');
+                    const errData = await res.json().catch(() => ({}));
+                    console.error('Hapus gagal:', errData);
+                    showToast(errData.message || 'Gagal menghapus anggota.', 'error');
                 }
             } catch (err) {
                 console.error(err);

@@ -34,6 +34,7 @@
                 <a href="{{ route('admin.audit.sekretariat.tambah-keluar') }}" class="flex-1 sm:flex-none justify-center bg-blue-600 text-white px-4 py-3 md:px-5 md:py-3.5 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="plus" size="16"></i> Surat Keluar
                 </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -416,12 +417,13 @@ function renderMasuk(page) {
             <td class="px-6 py-4 text-gray-500">${fmtDate(item.tanggal_diterima)}</td>
             <td class="px-6 py-4">
                 <div class="flex items-center justify-center gap-2">
-                    <a href="/admin/audit/sekretariat/edit-masuk?id=${item.id}" class="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                    ${window.__can('edit_surat') ? `<a href="/admin/audit/sekretariat/edit-masuk?id=${item.id}" class="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm">
                         <i data-lucide="pencil" size="14"></i>
-                    </a>
-                    <button onclick="hapusSurat('masuk', ${item.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                    </a>` : ''}
+                    ${window.__can('delete_surat') ? `<button onclick="hapusSurat('masuk', ${item.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
                         <i data-lucide="trash-2" size="14"></i>
-                    </button>
+                    </button>` : ''}
+                    ${!window.__can('edit_surat') && !window.__can('delete_surat') ? `<span class="text-[10px] text-gray-300 font-black uppercase">Read Only</span>` : ''}
                 </div>
             </td>
         </tr>`).join('');
@@ -455,12 +457,13 @@ function renderKeluar(page) {
             <td class="px-6 py-4 text-gray-500">${fmtDate(item.tanggal_dikirim)}</td>
             <td class="px-6 py-4">
                 <div class="flex items-center justify-center gap-2">
-                    <a href="/admin/audit/sekretariat/edit-keluar?id=${item.id}" class="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                    ${window.__can('edit_surat') ? `<a href="/admin/audit/sekretariat/edit-keluar?id=${item.id}" class="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm">
                         <i data-lucide="pencil" size="14"></i>
-                    </a>
-                    <button onclick="hapusSurat('keluar', ${item.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                    </a>` : ''}
+                    ${window.__can('delete_surat') ? `<button onclick="hapusSurat('keluar', ${item.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm">
                         <i data-lucide="trash-2" size="14"></i>
-                    </button>
+                    </button>` : ''}
+                    ${!window.__can('edit_surat') && !window.__can('delete_surat') ? `<span class="text-[10px] text-gray-300 font-black uppercase">Read Only</span>` : ''}
                 </div>
             </td>
         </tr>`).join('');
