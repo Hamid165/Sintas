@@ -22,6 +22,7 @@ Route::get('/profil', [ProfilController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/update-profil', [AuthController::class, 'updateProfil']);
+    Route::put('/user/password', [AuthController::class, 'updatePassword']);
     
     // Dashboard Stats
     Route::get('/dashboard', [DashboardController::class, 'index']);
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:create_anak')->post('/anak', [AnakController::class, 'store']);
     Route::middleware('permission:view_anak')->get('/anak/{anak}', [AnakController::class, 'show']);
     Route::middleware('permission:edit_anak')->put('/anak/{anak}', [AnakController::class, 'update']);
+    Route::middleware('permission:edit_anak')->patch('/anak/{anak}', [AnakController::class, 'update']);
     Route::middleware('permission:delete_anak')->delete('/anak/{anak}', [AnakController::class, 'destroy']);
 
     // ── Inventaris ────────────────────────────────────────────────────────────

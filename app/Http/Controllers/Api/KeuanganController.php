@@ -13,6 +13,11 @@ class KeuanganController extends Controller
         return response()->json(Keuangan::latest()->get());
     }
 
+    public function getAll()
+    {
+        return response()->json(Keuangan::latest()->get());
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

@@ -359,7 +359,12 @@
         const ok = await showConfirm('Hapus transaksi ini dari riwayat keuangan?');
         if (!ok) return;
         try {
-            await fetch(`/api/keuangan/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            const res = await fetch(`/api/keuangan/${id}`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ _method: 'DELETE' })
+            });
+            if (!res.ok) throw new Error('Gagal');
             showToast('Transaksi berhasil dihapus.', 'success');
             loadKeuangan();
         } catch(e) { showToast('Gagal menghapus transaksi.', 'error'); }

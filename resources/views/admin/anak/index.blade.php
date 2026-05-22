@@ -319,7 +319,12 @@
         const ok = await showConfirm('Hapus profil anak ini dari database CareHub?');
         if (!ok) return;
         try {
-            await fetch(`/api/anak/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            const res = await fetch(`/api/anak/${id}`, { 
+                method: 'POST', 
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ _method: 'DELETE' })
+            });
+            if (!res.ok) throw new Error('Gagal dari server');
             showToast('Data anak berhasil dihapus.', 'success');
             loadData();
         } catch(e) { showToast('Gagal menghapus data.', 'error'); }

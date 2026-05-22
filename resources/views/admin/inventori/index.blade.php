@@ -275,7 +275,12 @@
         const ok = await showConfirm('Hapus barang ini dari inventaris?');
         if (!ok) return;
         try {
-            await fetch(`/api/inventaris/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+            const res = await fetch(`/api/inventaris/${id}`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ _method: 'DELETE' })
+            });
+            if (!res.ok) throw new Error('Gagal');
             showToast('Barang berhasil dihapus dari inventaris.', 'success');
             loadInventori();
         } catch(e) { showToast('Gagal menghapus barang.', 'error'); }

@@ -136,13 +136,13 @@
 
         try {
             const res = await fetch(`/api/roles-permissions/${roleId}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ permissions })
+                body: JSON.stringify({ permissions, _method: 'PUT' })
             });
 
             const result = await res.json();

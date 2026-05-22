@@ -347,10 +347,16 @@ async function deleteAudit(id) {
     if (!ok) return;
 
     try {
-        const response = await fetch(`/api/audit-keuangan/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        const response = await fetch(`/api/audit-keuangan/${id}`, {
+            method: 'POST',
+            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ _method: 'DELETE' })
+        });
         if (response.ok) {
             showToast('Audit keuangan berhasil dihapus.', 'success');
             loadAuditKeuangan();
+        } else {
+            showToast('Gagal menghapus audit keuangan.', 'error');
         }
     } catch (error) {
         console.error('Error:', error);

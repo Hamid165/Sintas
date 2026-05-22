@@ -132,12 +132,13 @@ document.getElementById('formSuratKeluar').addEventListener('submit', async func
         keterangan: document.getElementById('keterangan').value,
     };
 
-    const method = editId ? 'PUT' : 'POST';
-    const url = editId ? `/api/surat-keluar/${editId}` : '/api/surat-keluar';
+    const isEdit = !!editId;
+    const url = isEdit ? `/api/surat-keluar/${editId}` : '/api/surat-keluar';
+    if (isEdit) payload['_method'] = 'PUT';
 
     try {
         const res = await fetch(url, {
-            method,
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',

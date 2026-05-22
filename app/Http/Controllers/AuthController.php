@@ -1,4 +1,5 @@
 <?php
+// Memicu sinkronisasi FTP ke server hosting
 
 namespace App\Http\Controllers;
 
@@ -38,8 +39,9 @@ class AuthController extends Controller
                 'token' => $token,
                 'user' => [
                     'name' => $user->name,
-                    'role' => $user->role,
-                    'jabatan' => $user->jabatan
+                    'role' => $user->roles->first()->name ?? $user->role, // Menggunakan role dari Spatie jika ada
+                    'jabatan' => $user->jabatan,
+                    'all_permissions' => $user->getAllPermissions()->pluck('name')
                 ]
             ], 200);
         }

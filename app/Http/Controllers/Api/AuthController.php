@@ -1,4 +1,5 @@
 <?php
+// Memicu sinkronisasi FTP ke server hosting
 
 namespace App\Http\Controllers\Api;
 
@@ -25,10 +26,20 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Jika admin, berikan semua permission yang ada di tabel Permission
+        if ($user->hasRole('admin') || $user->role === 'admin') {
+            $permissions = \Spatie\Permission\Models\Permission::pluck('name');
+        } else {
+            $permissions = $user->getAllPermissions()->pluck('name');
+        }
+
+        $userArray = $user->toArray();
+        $userArray['all_permissions'] = $permissions;
+
         return response()->json([
             'message' => 'Login sukses',
             'token' => $user->createToken('admin_token')->plainTextToken,
-            'user' => $user
+            'user' => $userArray
         ]);
     }
 
@@ -62,6 +73,30 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Profil berhasil diupdate',
             'user' => $user
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Password saat ini tidak cocok'
+            ], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+            'message' => 'Password berhasil diubah'
         ]);
     }
 }

@@ -224,7 +224,12 @@
         const ok = await showConfirm('Hapus kunjungan tamu ini secara permanen?');
         if (!ok) return;
         try {
-            await fetch(`/api/kunjungan-tamu/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'X-Requested-With': 'XMLHttpRequest' } });
+            const res = await fetch(`/api/kunjungan-tamu/${id}`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ _method: 'DELETE' })
+            });
+            if (!res.ok) throw new Error('Gagal');
             showToast('Kunjungan tamu berhasil dihapus.', 'success');
             loadArtikel();
         } catch(e) { showToast('Gagal menghapus kunjungan tamu.', 'error'); }

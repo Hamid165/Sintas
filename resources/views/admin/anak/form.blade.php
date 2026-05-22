@@ -140,7 +140,11 @@
             riwayat_kesehatan: document.getElementById('riwayat_kesehatan').value
         };
 
-        const method = editId ? 'PUT' : 'POST';
+        if (editId) {
+            payload._method = 'PUT';
+        }
+
+        const method = 'POST'; // always POST to bypass hosting limitations
         const url = editId ? `/api/anak/${editId}` : '/api/anak';
 
         try {

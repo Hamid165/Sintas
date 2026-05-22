@@ -496,8 +496,9 @@ async function hapusSurat(jenis, id) {
     if (!ok) return;
     const endpoint = jenis === 'masuk' ? `/api/surat-masuk/${id}` : `/api/surat-keluar/${id}`;
     const res = await fetch(endpoint, { 
-        method: 'DELETE', 
-        headers: getAuthHeaders()
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _method: 'DELETE' })
     });
     if (res.ok) {
         showToast(`Surat ${jenis} berhasil dihapus`, 'success');
