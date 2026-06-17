@@ -8,8 +8,8 @@
     <link rel="icon" type="image/svg+xml" href="/icon.svg">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- SheetJS for Excel Export -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- xlsx-js-style for Excel Export with Styling (Drop-in replacement for SheetJS) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <!-- jsPDF for PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -394,7 +394,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeExportModal(); });
 
     // ─── PDF Builder ─────────────────────────────────────────────────────────────
-    function buildPdf({ title, module, columns, rows, filename }) {
+    async function buildPdf({ title, module, columns, rows, filename }) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
         const W = doc.internal.pageSize.getWidth();
@@ -403,114 +403,210 @@
         const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
         const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
 
-        // Header band
-        doc.setFillColor(15, 23, 42);
-        doc.rect(0, 0, W, 28, 'F');
-        doc.setFillColor(37, 99, 235);
-        doc.rect(0, 28, W, 3, 'F');
+        // Clean Header Background
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, W, 25, 'F');
+        
+        // Logo Fetching & Placement
+        let logoData = null;
+        try {
+            const response = await fetch('/icon.svg');
+            if (response.ok) {
+                const svgText = await response.text();
+                const blob = new Blob([svgText], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(blob);
+                
+                logoData = await new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width || 800;
+                        canvas.height = img.height || 800;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/png'));
+                        URL.revokeObjectURL(url);
+                    };
+                    img.onerror = () => {
+                        resolve(null);
+                        URL.revokeObjectURL(url);
+                    };
+                    img.src = url;
+                });
+            }
+        } catch (e) { console.warn('Gagal memuat logo', e); }
 
-        // Logo circle
-        doc.setFillColor(37, 99, 235);
-        doc.roundedRect(10, 6, 16, 16, 3, 3, 'F');
-        doc.setTextColor(255, 255, 255);
+        if (logoData) {
+            // The SVG bounding box is 800x800. We place it at size 14x14
+            doc.addImage(logoData, 'PNG', 15, 8, 14, 14);
+        } else {
+            // Fallback Logo circle
+            doc.setFillColor(37, 99, 235); // blue-600
+            doc.roundedRect(15, 8, 14, 14, 3, 3, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('CH', 22, 17, { align: 'center' });
+        }
+
+        // Brand name & Module
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.text('CH', 18, 16.5, { align: 'center' });
+        doc.setFontSize(18);
+        doc.setTextColor(30, 41, 59);
+        doc.text('Care', 35, 14);
+        doc.setTextColor(37, 99, 235);
+        doc.text('Hub', 35 + doc.getTextWidth('Care'), 14);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('LAPORAN RESMI  •  SISTEM INFORMASI', 35, 20);
 
-        // Brand name
+        // Right side: Metadata
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Tanggal Cetak: ${dateStr}, ${timeStr}`, W - 15, 14, { align: 'right' });
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 41, 59);
+        doc.text(`Modul Aktif: ${module}`, W - 15, 20, { align: 'right' });
+
+        // Separator line
+        doc.setDrawColor(226, 232, 240); // slate-200
+        doc.setLineWidth(0.5);
+        doc.line(15, 26, W - 15, 26);
+
+        // Document Title
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(14);
-        doc.setTextColor(255, 255, 255);
-        doc.text('Care', 30, 12);
-        doc.setTextColor(96, 165, 250);
-        doc.text('Hub', 30 + doc.getTextWidth('Care'), 12);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(148, 163, 184);
-        doc.text('ADMIN PANEL  ·  LAPORAN RESMI', 30, 18);
-
-        // Right: timestamp
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(148, 163, 184);
-        doc.text(`Dicetak: ${dateStr}, ${timeStr}`, W - 10, 12, { align: 'right' });
-        doc.text(`Modul: ${module}`, W - 10, 18, { align: 'right' });
-
-        // Sub-header strip
-        doc.setFillColor(248, 250, 252);
-        doc.rect(0, 31, W, 16, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
         doc.setTextColor(15, 23, 42);
-        doc.text(title.toUpperCase(), 10, 42);
+        doc.text(title.toUpperCase(), 15, 36);
+        
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
+        doc.setFontSize(8.5);
         doc.setTextColor(100, 116, 139);
-        doc.text(`Total data: ${rows.length} baris`, W - 10, 42, { align: 'right' });
+        doc.text(`Total Baris: ${rows.length}`, W - 15, 36, { align: 'right' });
 
-        // Table
+        // Elegant Table
         doc.autoTable({
-            startY: 50,
+            startY: 44,
             head: [columns],
             body: rows,
+            theme: 'plain',
             styles: {
-                font: 'helvetica', fontSize: 8,
-                cellPadding: { top: 4, bottom: 4, left: 5, right: 5 },
-                textColor: [30, 41, 59],
-                lineColor: [226, 232, 240], lineWidth: 0.3,
+                font: 'helvetica', 
+                fontSize: 8.5,
+                cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+                textColor: [71, 85, 105], // slate-500
+                lineColor: [226, 232, 240], // slate-200
+                lineWidth: { bottom: 0.1 }, 
+                valign: 'middle'
             },
             headStyles: {
-                fillColor: [15, 23, 42], textColor: [255, 255, 255],
-                fontStyle: 'bold', fontSize: 7.5, halign: 'left',
+                fillColor: [248, 250, 252], // slate-50
+                textColor: [15, 23, 42], // slate-900
+                fontStyle: 'bold', 
+                fontSize: 8.5, 
+                halign: 'left',
+                valign: 'middle',
+                lineWidth: { top: 0.5, bottom: 0.5 },
+                lineColor: [203, 213, 225] // slate-300
             },
-            alternateRowStyles: { fillColor: [248, 250, 252] },
-            columnStyles: { 0: { halign: 'center', fontStyle: 'bold', cellWidth: 10 } },
-            margin: { left: 10, right: 10 },
-            tableLineColor: [226, 232, 240], tableLineWidth: 0.3,
+            alternateRowStyles: { 
+                fillColor: [255, 255, 255]
+            },
+            columnStyles: { 
+                0: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } // 12mm is plenty with 4mm padding (4mm text space)
+            },
+            margin: { left: 15, right: 15, bottom: 20 },
         });
 
         // Footer on each page
         const totalPages = doc.internal.getNumberOfPages();
         for (let p = 1; p <= totalPages; p++) {
             doc.setPage(p);
-            doc.setFillColor(15, 23, 42);
-            doc.rect(0, H - 10, W, 10, 'F');
+            // Footer separator
+            doc.setDrawColor(226, 232, 240);
+            doc.setLineWidth(0.5);
+            doc.line(15, H - 15, W - 15, H - 15);
+
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(6.5);
-            doc.setTextColor(148, 163, 184);
-            doc.text('© CareHub Admin  ·  Dokumen ini digenerate otomatis oleh sistem', 10, H - 3.5);
-            doc.text(`Halaman ${p} / ${totalPages}`, W - 10, H - 3.5, { align: 'right' });
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184); // slate-400
+            doc.text('© CareHub Admin  ·  Dokumen ini dibuat otomatis oleh sistem dan sah secara digital.', 15, H - 9);
+            doc.text(`Halaman ${p} dari ${totalPages}`, W - 15, H - 9, { align: 'right' });
         }
 
         doc.save(filename);
     }
 
-    // ─── Excel Builder ────────────────────────────────────────────────────────────
+    // ─── Excel Builder ───────────────────────────────────────────────────────────
     function buildExcel({ title, module, headers, rows, filename }) {
+        const wb = XLSX.utils.book_new();
         const now = new Date();
-        const dateStr = now.toLocaleString('id-ID');
+        const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + ' ' + now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
 
-        // Meta rows
-        const metaRows = [
-            ['CareHub Admin – Laporan Resmi'],
-            [`Modul: ${module}`],
-            [`Dicetak: ${dateStr}`],
-            [`Total Data: ${rows.length} baris`],
-            [], // blank spacer
+        const ws_data = [
+            ['CareHub'],
+            ['LAPORAN RESMI • SISTEM INFORMASI'],
+            [],
+            ['Judul Laporan:', title],
+            ['Modul Aktif:', module],
+            ['Tanggal Cetak:', dateStr],
+            ['Total Data:', `${rows.length} Baris`],
+            [],
             headers,
             ...rows
         ];
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
 
-        const ws = XLSX.utils.aoa_to_sheet(metaRows);
+        // Styling Cells
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell = ws[XLSX.utils.encode_cell({c: C, r: R})];
+                if (!cell) continue;
+
+                cell.s = { font: { name: 'Arial', sz: 11 }, alignment: { vertical: 'center' } };
+
+                // Kop Surat Styling
+                if (R === 0) cell.s.font = { name: 'Arial', sz: 16, bold: true, color: { rgb: "0F172A" } };
+                if (R === 1) cell.s.font = { name: 'Arial', sz: 9, color: { rgb: "64748B" } };
+                if (R >= 3 && R <= 6 && C === 0) cell.s.font = { bold: true };
+
+                // Table Header (Row 8)
+                if (R === 8) {
+                    cell.s.font = { bold: true, color: { rgb: "FFFFFF" } };
+                    cell.s.fill = { fgColor: { rgb: "1E3A8A" } }; // blue-900
+                    cell.s.alignment = { vertical: 'center', horizontal: 'center' };
+                    cell.s.border = {
+                        top: { style: 'thin', color: { auto: 1 } },
+                        bottom: { style: 'thin', color: { auto: 1 } },
+                        left: { style: 'thin', color: { auto: 1 } },
+                        right: { style: 'thin', color: { auto: 1 } }
+                    };
+                }
+
+                // Table Rows (Row 9+)
+                if (R >= 9) {
+                    cell.s.border = {
+                        top: { style: 'thin', color: { rgb: "CBD5E1" } },
+                        bottom: { style: 'thin', color: { rgb: "CBD5E1" } },
+                        left: { style: 'thin', color: { rgb: "CBD5E1" } },
+                        right: { style: 'thin', color: { rgb: "CBD5E1" } }
+                    };
+                    if (C === 0) cell.s.alignment.horizontal = 'center';
+                }
+            }
+        }
 
         // Column widths
-        const colW = headers.map((h, i) => ({ wch: i === 0 ? 6 : Math.max(h.length + 4, 18) }));
+        const colW = headers.map((h, i) => ({ wch: i === 0 ? 6 : Math.max(h.length + 6, 20) }));
         ws['!cols'] = colW;
 
         // Merge title cell across all columns
         ws['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:headers.length-1} }];
 
-        const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, module.substring(0, 31));
         XLSX.writeFile(wb, filename);
     }
@@ -522,8 +618,26 @@
             const s = String(v ?? '');
             return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
         };
-        const lines = [headers.map(esc).join(','), ...rows.map(r => r.map(esc).join(','))];
-        const blob = new Blob([BOM + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + ' ' + now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+        
+        let title = filename.split('_').slice(0, -1).join(' ').toUpperCase() || 'LAPORAN SISTEM';
+
+        const kopSurat = [
+            ['CareHub'],
+            ['LAPORAN RESMI • SISTEM INFORMASI'],
+            [],
+            ['Judul Laporan:', title],
+            ['Tanggal Cetak:', dateStr],
+            ['Total Data:', `${rows.length} Baris`],
+            []
+        ].map(r => r.map(esc).join(','));
+
+        const csvRows = [headers, ...rows].map(r => r.map(esc).join(','));
+        const csvContent = BOM + kopSurat.join('\n') + '\n' + csvRows.join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);

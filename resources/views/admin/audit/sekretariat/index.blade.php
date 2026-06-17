@@ -585,32 +585,216 @@ function openExportSekretariat() {
 async function exportSekretariatPdf() {
     const [masuk, keluar] = await Promise.all([fetchAllSuratMasuk(), fetchAllSuratKeluar()]);
     if (masuk.length === 0 && keluar.length === 0) { showToast('Tidak ada data surat yang bisa diekspor.', 'warning'); return; }
-    const now = new Date(); const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
-    const W = doc.internal.pageSize.getWidth(); const H = doc.internal.pageSize.getHeight();
-    function hdr() { doc.setFillColor(15,23,42);doc.rect(0,0,W,28,'F');doc.setFillColor(37,99,235);doc.rect(0,28,W,3,'F');doc.setFillColor(37,99,235);doc.roundedRect(10,6,16,16,3,3,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('CH',18,16.5,{align:'center'});doc.setFontSize(14);doc.text('Care',30,12);doc.setTextColor(96,165,250);doc.text('Hub',30+doc.getTextWidth('Care'),12);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(148,163,184);doc.text('ADMIN PANEL  ·  LAPORAN RESMI',30,18);doc.text(`Dicetak: ${now.toLocaleString('id-ID')}`,W-10,15,{align:'right'}); }
-    function ftr() { const t=doc.internal.getNumberOfPages(); for(let p=1;p<=t;p++){doc.setPage(p);doc.setFillColor(15,23,42);doc.rect(0,H-10,W,10,'F');doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(148,163,184);doc.text('© CareHub Admin',10,H-3.5);doc.text(`Halaman ${p}/${t}`,W-10,H-3.5,{align:'right'});} }
-    hdr(); doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(15,23,42);doc.text('REKAP SURAT MASUK',10,42);
-    doc.autoTable({ startY:50, head:[['No','Kode Surat','Perihal','Pengirim','Tgl Surat','Tgl Diterima']], body:masuk.map((r,i)=>[i+1,r.kode_surat,r.perihal,r.pengirim,fmtDate(r.tanggal_surat),fmtDate(r.tanggal_diterima)]), headStyles:{fillColor:[15,23,42],textColor:255,fontStyle:'bold'}, alternateRowStyles:{fillColor:[248,250,252]}, margin:{left:10,right:10} });
-    doc.addPage(); hdr(); doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(15,23,42);doc.text('REKAP SURAT KELUAR',10,42);
-    doc.autoTable({ startY:50, head:[['No','Kode Surat','Perihal','Tujuan','Tgl Surat','Tgl Dikirim']], body:keluar.map((r,i)=>[i+1,r.kode_surat,r.perihal,r.tujuan,fmtDate(r.tanggal_surat),fmtDate(r.tanggal_dikirim)]), headStyles:{fillColor:[15,23,42],textColor:255,fontStyle:'bold'}, alternateRowStyles:{fillColor:[248,250,252]}, margin:{left:10,right:10} });
-    ftr(); doc.save(`rekap_sekretariat_${now.toISOString().slice(0,10)}.pdf`);
-    showToast('File PDF sedang diunduh...', 'success');
+    const now = new Date(); 
+    const { jsPDF } = window.jspdf; 
+    const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+    const W = doc.internal.pageSize.getWidth(); 
+    const H = doc.internal.pageSize.getHeight();
+    const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+
+    // Fetch logo
+    let logoData = null;
+    try {
+        const response = await fetch('/icon.svg');
+        if (response.ok) {
+            const svgText = await response.text();
+            const blob = new Blob([svgText], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            logoData = await new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width || 800; canvas.height = img.height || 800;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/png'));
+                    URL.revokeObjectURL(url);
+                };
+                img.onerror = () => { resolve(null); URL.revokeObjectURL(url); };
+                img.src = url;
+            });
+        }
+    } catch (e) { console.warn(e); }
+
+    function hdr(titleText, rowCount) { 
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, 25, 'F');
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', 15, 8, 14, 14);
+        } else {
+            doc.setFillColor(37, 99, 235); doc.roundedRect(15, 8, 14, 14, 3, 3, 'F');
+            doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9); doc.text('CH', 22, 17, { align: 'center' });
+        }
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(30, 41, 59);
+        doc.text('Care', 35, 14); doc.setTextColor(37, 99, 235); doc.text('Hub', 35 + doc.getTextWidth('Care'), 14);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
+        doc.text('LAPORAN RESMI  •  SISTEM INFORMASI', 35, 20);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
+        doc.text(`Tanggal Cetak: ${dateStr}, ${timeStr}`, W - 15, 14, { align: 'right' });
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 41, 59);
+        doc.text(`Modul Aktif: Audit Kesekretariatan`, W - 15, 20, { align: 'right' });
+        doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.5); doc.line(15, 26, W - 15, 26);
+        
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(15, 23, 42);
+        doc.text(titleText, 15, 36);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(100, 116, 139);
+        doc.text(`Total Baris: ${rowCount}`, W - 15, 36, { align: 'right' });
+    }
+
+    function ftr() { 
+        const t = doc.internal.getNumberOfPages(); 
+        for(let p = 1; p <= t; p++){
+            doc.setPage(p);
+            doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.5); doc.line(15, H - 15, W - 15, H - 15);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+            doc.text('© CareHub Admin  ·  Dokumen ini dibuat otomatis oleh sistem dan sah secara digital.', 15, H - 9);
+            doc.text(`Halaman ${p} dari ${t}`, W - 15, H - 9, { align: 'right' });
+        } 
+    }
+
+    const tableStyles = {
+        theme: 'plain',
+        styles: { font: 'helvetica', fontSize: 8.5, cellPadding: { top: 4, bottom: 4, left: 4, right: 4 }, textColor: [71, 85, 105], lineColor: [226, 232, 240], lineWidth: { bottom: 0.1 }, valign: 'middle' },
+        headStyles: { fillColor: [248, 250, 252], textColor: [15, 23, 42], fontStyle: 'bold', fontSize: 8.5, halign: 'left', valign: 'middle', lineWidth: { top: 0.5, bottom: 0.5 }, lineColor: [203, 213, 225] },
+        alternateRowStyles: { fillColor: [255, 255, 255] },
+        columnStyles: { 0: { halign: 'center', fontStyle: 'bold', cellWidth: 12 } },
+        margin: { left: 15, right: 15, bottom: 20 }
+    };
+
+    if (masuk.length > 0) {
+        hdr('REKAP SURAT MASUK', masuk.length);
+        doc.autoTable({ 
+            startY: 44, head: [['No','Kode Surat','Perihal','Pengirim','Tgl Surat','Tgl Diterima']], 
+            body: masuk.map((r,i)=>[i+1, r.kode_surat, r.perihal, r.pengirim, fmtDate(r.tanggal_surat), fmtDate(r.tanggal_diterima)]), 
+            ...tableStyles 
+        });
+    }
+
+    if (keluar.length > 0) {
+        if (masuk.length > 0) doc.addPage();
+        hdr('REKAP SURAT KELUAR', keluar.length);
+        doc.autoTable({ 
+            startY: 44, head: [['No','Kode Surat','Perihal','Tujuan','Tgl Surat','Tgl Dikirim']], 
+            body: keluar.map((r,i)=>[i+1, r.kode_surat, r.perihal, r.tujuan, fmtDate(r.tanggal_surat), fmtDate(r.tanggal_dikirim)]), 
+            ...tableStyles 
+        });
+    }
+
+    ftr(); 
+    doc.save(`rekap_sekretariat_${now.toISOString().slice(0,10)}.pdf`);
+    showToast('File PDF berhasil diunduh...', 'success');
 }
 async function exportSekretariatExcel() {
-    const [m,k] = await Promise.all([fetchAllSuratMasuk(),fetchAllSuratKeluar()]);
+    const [m, k] = await Promise.all([fetchAllSuratMasuk(), fetchAllSuratKeluar()]);
     if (m.length === 0 && k.length === 0) { showToast('Tidak ada data surat yang bisa diekspor.', 'warning'); return; }
+    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + ' ' + now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['No','Kode Surat','Perihal','Pengirim','Tgl Surat','Tgl Diterima'],...m.map((r,i)=>[i+1,r.kode_surat,r.perihal,r.pengirim,fmtDate(r.tanggal_surat),fmtDate(r.tanggal_diterima)])]), 'Surat Masuk');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['No','Kode Surat','Perihal','Tujuan','Tgl Surat','Tgl Dikirim'],...k.map((r,i)=>[i+1,r.kode_surat,r.perihal,r.tujuan,fmtDate(r.tanggal_surat),fmtDate(r.tanggal_dikirim)])]), 'Surat Keluar');
-    XLSX.writeFile(wb, `rekap_sekretariat_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+    const getKopSurat = (title, rowCount) => [
+        ['CareHub'],
+        ['LAPORAN RESMI • SISTEM INFORMASI'],
+        [],
+        ['Judul Laporan:', title],
+        ['Modul Aktif:', 'Audit Kesekretariatan'],
+        ['Tanggal Cetak:', dateStr],
+        ['Total Data:', `${rowCount} Baris`],
+        []
+    ];
+
+    const applyStyle = (ws) => {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell = ws[XLSX.utils.encode_cell({c: C, r: R})];
+                if (!cell) continue;
+
+                cell.s = { font: { name: 'Arial', sz: 11 }, alignment: { vertical: 'center' } };
+
+                // Kop Surat
+                if (R === 0) cell.s.font = { name: 'Arial', sz: 16, bold: true, color: { rgb: "0F172A" } };
+                if (R === 1) cell.s.font = { name: 'Arial', sz: 9, color: { rgb: "64748B" } };
+                if (R >= 3 && R <= 6 && C === 0) cell.s.font = { bold: true };
+
+                // Table Header (Row 8)
+                if (R === 8) {
+                    cell.s.font = { bold: true, color: { rgb: "FFFFFF" } };
+                    cell.s.fill = { fgColor: { rgb: "1E3A8A" } }; 
+                    cell.s.alignment = { vertical: 'center', horizontal: 'center' };
+                    cell.s.border = { top: { style: 'thin', color: { auto: 1 } }, bottom: { style: 'thin', color: { auto: 1 } }, left: { style: 'thin', color: { auto: 1 } }, right: { style: 'thin', color: { auto: 1 } } };
+                }
+
+                // Table Rows
+                if (R >= 9) {
+                    cell.s.border = { top: { style: 'thin', color: { rgb: "CBD5E1" } }, bottom: { style: 'thin', color: { rgb: "CBD5E1" } }, left: { style: 'thin', color: { rgb: "CBD5E1" } }, right: { style: 'thin', color: { rgb: "CBD5E1" } } };
+                    if (C === 0) cell.s.alignment.horizontal = 'center';
+                }
+            }
+        }
+        ws['!cols'] = [{ wch: 6 }, { wch: 25 }, { wch: 30 }, { wch: 25 }, { wch: 20 }, { wch: 20 }];
+    };
+
+    if (m.length > 0) {
+        const wsMasuk = XLSX.utils.aoa_to_sheet([
+            ...getKopSurat('Rekap Surat Masuk', m.length),
+            ['No','Kode Surat','Perihal','Pengirim','Tgl Surat','Tgl Diterima'],
+            ...m.map((r,i)=>[i+1, r.kode_surat, r.perihal, r.pengirim, fmtDate(r.tanggal_surat), fmtDate(r.tanggal_diterima)])
+        ]);
+        applyStyle(wsMasuk);
+        XLSX.utils.book_append_sheet(wb, wsMasuk, 'Surat Masuk');
+    }
+
+    if (k.length > 0) {
+        const wsKeluar = XLSX.utils.aoa_to_sheet([
+            ...getKopSurat('Rekap Surat Keluar', k.length),
+            ['No','Kode Surat','Perihal','Tujuan','Tgl Surat','Tgl Dikirim'],
+            ...k.map((r,i)=>[i+1, r.kode_surat, r.perihal, r.tujuan, fmtDate(r.tanggal_surat), fmtDate(r.tanggal_dikirim)])
+        ]);
+        applyStyle(wsKeluar);
+        XLSX.utils.book_append_sheet(wb, wsKeluar, 'Surat Keluar');
+    }
+
+    XLSX.writeFile(wb, `rekap_sekretariat_${now.toISOString().slice(0,10)}.xlsx`);
     showToast('File Excel sedang diunduh...', 'success');
 }
 async function exportSekretariatCsv() {
-    const [m,k] = await Promise.all([fetchAllSuratMasuk(),fetchAllSuratKeluar()]);
+    const [m, k] = await Promise.all([fetchAllSuratMasuk(), fetchAllSuratKeluar()]);
     if (m.length === 0 && k.length === 0) { showToast('Tidak ada data surat yang bisa diekspor.', 'warning'); return; }
+    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + ' ' + now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
     const esc = v => { const s=String(v??''); return s.includes(',')||s.includes('"')?`"${s.replace(/"/g,'""')}"`:s; };
-    const lines = ['=== SURAT MASUK ===','No,Kode Surat,Perihal,Pengirim,Tgl Surat,Tgl Diterima',...m.map((r,i)=>[i+1,r.kode_surat,r.perihal,r.pengirim,fmtDate(r.tanggal_surat),fmtDate(r.tanggal_diterima)].map(esc).join(',')),'','=== SURAT KELUAR ===','No,Kode Surat,Perihal,Tujuan,Tgl Surat,Tgl Dikirim',...k.map((r,i)=>[i+1,r.kode_surat,r.perihal,r.tujuan,fmtDate(r.tanggal_surat),fmtDate(r.tanggal_dikirim)].map(esc).join(','))];
-    const a = document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'})); a.download=`rekap_sekretariat_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    
+    const kopSurat = [
+        ['CareHub'],
+        ['LAPORAN RESMI • SISTEM INFORMASI'],
+        [],
+        ['Judul Laporan:', 'Rekap Kesekretariatan'],
+        ['Modul Aktif:', 'Audit Kesekretariatan'],
+        ['Tanggal Cetak:', dateStr],
+        ['Total Surat Masuk:', `${m.length} Baris`],
+        ['Total Surat Keluar:', `${k.length} Baris`],
+        []
+    ].map(r => r.map(esc).join(','));
+
+    const lines = [
+        ...kopSurat,
+        '=== SURAT MASUK ===',
+        'No,Kode Surat,Perihal,Pengirim,Tgl Surat,Tgl Diterima',
+        ...m.map((r,i)=>[i+1, r.kode_surat, r.perihal, r.pengirim, fmtDate(r.tanggal_surat), fmtDate(r.tanggal_diterima)].map(esc).join(',')),
+        '',
+        '=== SURAT KELUAR ===',
+        'No,Kode Surat,Perihal,Tujuan,Tgl Surat,Tgl Dikirim',
+        ...k.map((r,i)=>[i+1, r.kode_surat, r.perihal, r.tujuan, fmtDate(r.tanggal_surat), fmtDate(r.tanggal_dikirim)].map(esc).join(','))
+    ];
+    
+    const a = document.createElement('a'); 
+    a.href = URL.createObjectURL(new Blob(['\uFEFF' + lines.join('\n')], {type:'text/csv;charset=utf-8;'})); 
+    a.download = `rekap_sekretariat_${now.toISOString().slice(0,10)}.csv`; 
+    a.click();
     showToast('File CSV sedang diunduh...', 'success');
 }
 
