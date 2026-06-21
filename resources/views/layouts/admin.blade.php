@@ -78,13 +78,13 @@
                 </a>
                 @endcan
 
-                @can('view_audit')
+                @if(Auth::user()->can('view_audit') || Auth::user()->can('view_surat'))
                 <a href="{{ route('admin.audit') }}"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.audit*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <i data-lucide="shield-check" size="20"></i>
                     <span class="font-black text-xs uppercase tracking-widest">Audit</span>
                 </a>
-                @endcan
+                @endif
 
                 @if(Auth::user()->role == 'admin')
                     <a href="{{ route('admin.struktur') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all {{ request()->routeIs('admin.struktur') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">

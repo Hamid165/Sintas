@@ -60,10 +60,14 @@
 
             let groupsHtml = '';
             for (const groupName in allPermissions) {
+                if (groupName.toLowerCase() === 'sdm') continue;
+                
                 let permsHtml = '';
                 allPermissions[groupName].forEach(perm => {
                     const isChecked = rolePerms.includes(perm.name) ? 'checked' : '';
                     const action = perm.name.split('_')[0];
+
+                    if (action === 'edit' && (groupName.toLowerCase() === 'keuangan' || groupName.toLowerCase() === 'audit')) return;
                     const actionLabel = {
                         'view': 'Read (Lihat)',
                         'create': 'Create (Tambah)',
@@ -139,6 +143,15 @@
         const formData = new FormData(form);
         const permissions = formData.getAll('permissions[]');
 
+        // Auth token from localStorage (di login blade simpannya sebagai auth_token)
+        const token = localStorage.getItem('auth_token');
+
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="animate-spin" data-lucide="loader-2" size="16"></i> Memproses...';
+        btn.disabled = true;
+        lucide.createIcons();
+
         try {
             const res = await fetch(`/api/roles-permissions/${roleId}`, {
                 method: 'POST',
@@ -150,15 +163,17 @@
                 body: JSON.stringify({ permissions, _method: 'PUT' })
             });
 
+            if (!res.ok) throw new Error('Failed to update');
+            
             const result = await res.json();
-            if (res.ok) {
-                showToast(result.message, 'success');
-                fetchRoles(); // Refresh data
-            } else {
-                showToast(result.message || 'Gagal menyimpan', 'error');
-            }
+            showToast(result.message, 'success');
+            setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
-            showToast('Terjadi kesalahan', 'error');
+            showToast('Terjadi kesalahan, gagal menyimpan.', 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            lucide.createIcons();
         }
     }
 </script>

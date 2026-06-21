@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
@@ -22,7 +23,14 @@ Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->nam
 Route::post('/api/reset-password', [AuthController::class, 'resetPassword']);
 
 // Redirect root to dashboard
-Route::get('/', fn() => redirect()->route('admin.dashboard'));
+Route::get('/', function () {
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+    if ($user && $user->hasRole('bendahara')) {
+        return redirect()->route('admin.audit');
+    }
+    return redirect()->route('admin.dashboard');
+});
 
 // Admin panel - List pages
 Route::middleware(['auth'])->prefix('admin')->group(function () {
@@ -76,9 +84,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/inventori/tambah', fn() => view('admin.inventori.form'))->name('admin.inventori.tambah');
     });
 
+    // Dashboard Audit Utama (Bisa diakses jika punya akses audit keuangan ATAU surat)
+    Route::middleware(['permission:view_audit|view_surat'])->group(function () {
+        Route::get('/audit', fn() => view('admin.audit.index'))->name('admin.audit');
+    });
+
     // Audit Menu - berdasarkan permission Spatie
     Route::middleware(['permission:view_audit'])->group(function () {
-        Route::get('/audit', fn() => view('admin.audit.index'))->name('admin.audit');
         Route::get('/audit/keuangan', [AuditKeuanganController::class, 'index'])->name('admin.audit.keuangan');
         Route::get('/audit/keuangan/tambah', [AuditKeuanganController::class, 'create'])->name('admin.audit.keuangan.tambah');
     });

@@ -11,7 +11,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        @if(Auth::user()->role == 'admin' || Auth::user()->role == 'sekretariat')
+        @can('view_surat')
         <!-- Rekap Kesekretariatan Card -->
         <a href="{{ route('admin.audit.sekretariat') }}" class="group bg-white rounded-[2rem] shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-orange-500">
             <div class="h-40 bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-start px-8 relative overflow-hidden">
@@ -36,9 +36,9 @@
                 </div>
             </div>
         </a>
-        @endif
+        @endcan
 
-        @if(Auth::user()->role == 'admin' || Auth::user()->role == 'bendahara')
+        @can('view_audit')
         <!-- Audit Keuangan Card -->
         <a href="{{ route('admin.audit.keuangan') }}" class="group bg-white rounded-[2rem] shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-blue-600">
             <div class="h-40 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-start px-8 relative overflow-hidden">
@@ -63,7 +63,7 @@
                 </div>
             </div>
         </a>
-        @endif
+        @endcan
     </div>
 </div>
 @endsection
